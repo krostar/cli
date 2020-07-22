@@ -16,11 +16,10 @@ func main() {
 	ctx, cancel := cli.NewContextCancelableBySignal()
 	defer cancel()
 
-	err := urfavecli.Execute(ctx,
+	cli.Exit(ctx, urfavecli.Execute(ctx,
 		cli.
 			NewCommand("root", &example.CommandRoot{}).
 			AddCommand("print", &example.CommandPrint{}),
-		os.Args)
-
-	cli.PrintErrorIfAnyAndExit(err)
+		os.Args),
+	)
 }

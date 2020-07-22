@@ -8,7 +8,10 @@ import (
 
 type ctxKey uint8
 
-const ctxMetadataKey ctxKey = iota
+const (
+	ctxMetadataKey ctxKey = iota
+	ctxExitLogger
+)
 
 func ContextWithMetadata(ctx context.Context) context.Context {
 	metadata := make(map[interface{}]interface{})
@@ -34,6 +37,8 @@ func GetMetadata(ctx context.Context, key interface{}) interface{} {
 // NewContextCancelableBySignal creates a new context that cancels itself when provided signals are triggered.
 func NewContextCancelableBySignal(signals ...os.Signal) (context.Context, func()) {
 	ctx, cancel := context.WithCancel(context.Background())
+	ctx = ContextWithMetadata(ctx)
+
 	if len(signals) == 0 {
 		return ctx, cancel
 	}

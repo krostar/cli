@@ -2,6 +2,8 @@ package cli
 
 import (
 	"context"
+	"io"
+	"os"
 )
 
 type CLI struct {
@@ -37,4 +39,16 @@ type Hooks struct {
 	AfterCommandExecution            func(ctx context.Context) error
 	PersistentBeforeCommandExecution func(ctx context.Context) error
 	PersistentAfterCommandExecution  func(ctx context.Context) error
+}
+
+func SetExitLogger(ctx context.Context, writer io.Writer) {
+	SetMetadata(ctx, ctxExitLogger, writer)
+}
+
+func getExitLogger(ctx context.Context) io.Writer {
+	rawWriter := GetMetadata(ctx, ctxExitLogger)
+	if writer, ok := rawWriter.(io.Writer); ok {
+		return writer
+	}
+	return os.Stderr
 }

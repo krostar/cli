@@ -44,13 +44,14 @@ func (cmd *CommandRoot) Hooks() *cli.Hooks {
 			return nil
 		},
 		PersistentBeforeCommandExecution: func(ctx context.Context) error {
-			logger, flush, err := zap.New(zap.WithConfig(cmd.cfg.Logger))
+			log, flush, err := zap.New(zap.WithConfig(cmd.cfg.Logger))
 			if err != nil {
 				return fmt.Errorf("unable to build logger: %v", err)
 			}
 
 			flushLogs = flush
-			setLogger(ctx, logger)
+			setLogger(ctx, log)
+			cli.SetExitLogger(ctx, logger.WriterLevel(log, logger.LevelError))
 
 			return nil
 		},
@@ -58,10 +59,18 @@ func (cmd *CommandRoot) Hooks() *cli.Hooks {
 			_ = flushLogs()
 			return nil
 		},
+		BeforeCommandExecution: func(ctx context.Context) error {
+			log, err := getLogger(ctx)
+			if err != nil {
+				return err
+			}
+			cmd.logger = log
+			return nil
+		},
 	}
 }
 
 func (cmd CommandRoot) Execute(_ context.Context, args []string, dashedArgs []string) error {
 	cmd.logger.Info("root command")
-	return cli.ErrorWithExitStatus(cli.ErrShowHelp, 0)
+	return cli.ErrorWithExitStatus(cli.ErrorShowHelp(nil), 0)
 }

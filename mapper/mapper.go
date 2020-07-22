@@ -89,7 +89,7 @@ func PersistentFlags(cmd cli.Command) []cli.Flag {
 
 func Usage(cmd cli.Command) string {
 	if get, ok := cmd.(iUsage); ok {
-		return get.Usage()
+		return " " + get.Usage()
 	}
 	return ""
 }

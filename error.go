@@ -1,6 +1,7 @@
 package cli
 
 import (
+	"context"
 	"errors"
 	"io"
 	"os"
@@ -8,16 +9,21 @@ import (
 
 type ShowHelpError interface {
 	error
-	Unwrap() error
 	ShowHelp() bool
 }
 
-type showHelpError struct{ error }
+type showHelpError struct{ err error }
 
 func (she showHelpError) ShowHelp() bool { return true }
-func (she showHelpError) Unwrap() error  { return she.error }
+func (she showHelpError) Unwrap() error  { return she.err }
+func (she showHelpError) Error() string {
+	if she.err != nil {
+		return "help requested: " + she.err.Error()
+	}
+	return ""
+}
 
-func ErrorShowHelp(err error) error { return &showHelpError{err} }
+func ErrorShowHelp(err error) error { return &showHelpError{err: err} }
 
 type ExitStatusError interface {
 	error
@@ -36,20 +42,29 @@ func ErrorWithExitStatus(err error, status int) error {
 	return &exitStatusError{error: err, status: status}
 }
 
-func PrintErrorIfAnyAndExit(writer io.Writer, err error) {
-	if err == nil {
-		os.Exit(0)
+func Exit(ctx context.Context, err error) {
+	var (
+		msg    string
+		status int
+	)
+
+	if err != nil {
+		var errWithStatus ExitStatusError
+		if errors.As(err, &errWithStatus) {
+			status = errWithStatus.ExitStatus()
+		} else {
+			status = 125
+		}
+		msg = err.Error()
 	}
 
-	_, _ = io.WriteString(writer, err.Error()+"\n")
-	if closer, ok := writer.(io.Closer); ok {
-		_ = closer.Close()
+	if msg != "" {
+		writer := getExitLogger(ctx)
+		_, _ = io.WriteString(writer, msg+"\n")
+		if closer, ok := writer.(io.Closer); ok {
+			_ = closer.Close()
+		}
 	}
 
-	var errWithStatus ExitStatusError
-	if errors.As(err, &errWithStatus) {
-		os.Exit(errWithStatus.ExitStatus())
-	}
-
-	os.Exit(1)
+	os.Exit(status)
 }

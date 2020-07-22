@@ -17,8 +17,6 @@ import (
 )
 
 func Execute(ctx context.Context, c *cli.CLI, args []string) error {
-	ctx = cli.ContextWithMetadata(ctx)
-
 	command, err := buildCommandRecursively(ctx, c)
 	if err != nil {
 		return err
@@ -66,7 +64,7 @@ func buildCommand(ctx context.Context, commandName string, cmd cli.Command) (*co
 		Short:                 mapper.ShortDescription(cmd),
 		SilenceErrors:         true,
 		SilenceUsage:          true,
-		Use:                   commandName,
+		Use:                   commandName + mapper.Usage(cmd),
 	}
 
 	hooks := mapper.Hooks(cmd)

@@ -7,7 +7,7 @@ import (
 	"github.com/krostar/cli"
 	"github.com/krostar/cli/app"
 	"github.com/krostar/cli/internal/example"
-	spf13cobra "github.com/krostar/cli/mapper/spf13/cobra"
+	"github.com/krostar/cli/mapper/spf13/cobra"
 )
 
 func main() {
@@ -16,11 +16,10 @@ func main() {
 	ctx, cancel := cli.NewContextCancelableBySignal()
 	defer cancel()
 
-	err := spf13cobra.Execute(ctx,
+	cli.Exit(ctx, cobra.Execute(ctx,
 		cli.
 			NewCommand("root", &example.CommandRoot{}).
 			AddCommand("print", &example.CommandPrint{}),
-		os.Args)
-
-	cli.PrintErrorIfAnyAndExit(err)
+		os.Args),
+	)
 }

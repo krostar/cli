@@ -16,8 +16,6 @@ import (
 )
 
 func Execute(ctx context.Context, c *cli.CLI, args []string) error {
-	ctx = cli.ContextWithMetadata(ctx)
-
 	command, err := buildCommandRecursively(ctx, c)
 	if err != nil {
 		return err
@@ -66,14 +64,25 @@ func buildCommandRecursively(ctx context.Context, cli *cli.CLI) (*urfavecli.Comm
 }
 
 func buildCommand(ctx context.Context, commandName string, cmd cli.Command) (*urfavecli.Command, error) {
+	description := mapper.Description(cmd)
+	if examples := mapper.Examples(cmd); len(examples) > 0 {
+		description += "\n\nEXAMPLES:\n   " + strings.Join(mapper.Examples(cmd), "\n   ")
+	}
+
+	var usage string
+	if u := mapper.Usage(cmd); u != "" {
+		usage = commandName + u
+	}
+
 	hooks := mapper.Hooks(cmd)
 	command := &urfavecli.Command{
 		Action:                 handlerFromCommand(cmd, hooks),
 		After:                  handlerFromHook(hooks.PersistentAfterCommandExecution),
 		Before:                 handlerFromHook(hooks.PersistentBeforeCommandExecution),
-		Description:            fmt.Sprintf("%s\nExamples:\n  %s", mapper.Description(cmd), strings.Join(mapper.Examples(cmd), "\n  ")),
+		Description:            description,
 		Name:                   commandName,
 		Usage:                  mapper.ShortDescription(cmd),
+		UsageText:              usage,
 		UseShortOptionHandling: true,
 	}
 
@@ -105,7 +114,8 @@ func handlerFromCommand(cmd cli.Command, hooks *cli.Hooks) func(*urfavecli.Conte
 
 		var err error
 		if handlerErr := cmd.Execute(ctx, args, dashedArgs); handlerErr != nil {
-			if errors.Is(err, cli.ErrShowHelp) {
+			var errHelp cli.ShowHelpError
+			if errors.As(err, &errHelp) {
 				handlerErr = flag.ErrHelp
 			}
 			err = multierr.Append(err, handlerErr)
@@ -142,7 +152,8 @@ func getDifferentsArgs(args []string) ([]string, []string) {
 }
 
 func onError(c *urfavecli.Context, err error) {
-	if errors.Is(err, cli.ErrShowHelp) {
+	var errHelp cli.ShowHelpError
+	if errors.As(err, &errHelp) {
 		_ = urfavecli.ShowCommandHelp(c, c.Command.Name)
 	}
 }
