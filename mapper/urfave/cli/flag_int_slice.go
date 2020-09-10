@@ -9,14 +9,14 @@ import (
 )
 
 type flagIntSlice struct {
-	*customFlag
+	*CustomFlag
 	*flagIntSliceValue
 }
 
 func newFlagIntSlice(flag cli.Flag, dest *[]int) *flagIntSlice {
 	v := &flagIntSliceValue{dest: dest}
 	return &flagIntSlice{
-		customFlag:        newCustomFlag(flag, *dest, v),
+		CustomFlag:        NewCustomFlag(flag, *dest, v),
 		flagIntSliceValue: v,
 	}
 }

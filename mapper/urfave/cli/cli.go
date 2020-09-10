@@ -15,8 +15,13 @@ import (
 	"github.com/krostar/cli/mapper"
 )
 
-func Execute(ctx context.Context, c *cli.CLI, args []string) error {
-	command, err := buildCommandRecursively(ctx, c)
+func Execute(ctx context.Context, c *cli.CLI, args []string, opts ...Option) error {
+	options := newOptions()
+	for _, o := range opts {
+		o(options)
+	}
+
+	command, err := buildCommandRecursively(ctx, c, options)
 	if err != nil {
 		return err
 	}
@@ -46,14 +51,14 @@ func Execute(ctx context.Context, c *cli.CLI, args []string) error {
 	return app.RunContext(ctx, args)
 }
 
-func buildCommandRecursively(ctx context.Context, cli *cli.CLI) (*urfavecli.Command, error) {
-	command, err := buildCommand(ctx, cli.Name, cli.Command)
+func buildCommandRecursively(ctx context.Context, cli *cli.CLI, options *options) (*urfavecli.Command, error) {
+	command, err := buildCommand(ctx, cli.Name, cli.Command, options)
 	if err != nil {
 		return nil, fmt.Errorf("unable to build urfave/cli command %s: %w", cli.Name, err)
 	}
 
 	for _, sub := range cli.SubCommands {
-		subCommand, err := buildCommandRecursively(ctx, sub)
+		subCommand, err := buildCommandRecursively(ctx, sub, options)
 		if err != nil {
 			return nil, fmt.Errorf("unable to build urfave/cli sub-command %s of command %s: %w", sub.Name, cli.Name, err)
 		}
@@ -63,7 +68,7 @@ func buildCommandRecursively(ctx context.Context, cli *cli.CLI) (*urfavecli.Comm
 	return command, nil
 }
 
-func buildCommand(ctx context.Context, commandName string, cmd cli.Command) (*urfavecli.Command, error) {
+func buildCommand(ctx context.Context, commandName string, cmd cli.Command, options *options) (*urfavecli.Command, error) {
 	description := mapper.Description(cmd)
 	if examples := mapper.Examples(cmd); len(examples) > 0 {
 		description += "\n\nEXAMPLES:\n   " + strings.Join(mapper.Examples(cmd), "\n   ")
@@ -91,7 +96,7 @@ func buildCommand(ctx context.Context, commandName string, cmd cli.Command) (*ur
 	}
 
 	var err error
-	if command.Flags, err = buildFlags(cmd); err != nil {
+	if command.Flags, err = buildFlags(cmd, options); err != nil {
 		return nil, fmt.Errorf("urfave/cli flags build failed: %w", err)
 	}
 

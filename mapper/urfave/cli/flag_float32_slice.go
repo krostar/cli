@@ -9,14 +9,14 @@ import (
 )
 
 type flagFloat32Slice struct {
-	*customFlag
+	*CustomFlag
 	*flagFloat32SliceValue
 }
 
 func newFlagFloat32Slice(flag cli.Flag, dest *[]float32) *flagFloat32Slice {
 	v := &flagFloat32SliceValue{dest: dest}
 	return &flagFloat32Slice{
-		customFlag:            newCustomFlag(flag, *dest, v),
+		CustomFlag:            NewCustomFlag(flag, *dest, v),
 		flagFloat32SliceValue: v,
 	}
 }

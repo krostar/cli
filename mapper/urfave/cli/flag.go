@@ -2,7 +2,6 @@ package cli
 
 import (
 	"flag"
-	"fmt"
 	"time"
 
 	urfavecli "github.com/urfave/cli/v2"
@@ -12,7 +11,7 @@ import (
 	"github.com/krostar/cli/mapper"
 )
 
-func buildFlags(cmd cli.Command) ([]urfavecli.Flag, error) {
+func buildFlags(cmd cli.Command, options *options) ([]urfavecli.Flag, error) {
 	var (
 		flags []urfavecli.Flag
 		err   error
@@ -54,7 +53,12 @@ func buildFlags(cmd cli.Command) ([]urfavecli.Flag, error) {
 		case *[]time.Duration:
 			flags = append(flags, newFlagDurationSlice(flag, dest))
 		default:
-			err = multierr.Append(err, fmt.Errorf("unhandled flag type: %T", dest))
+			f, customErr := options.customFlagMapper(flag)
+			if customErr != nil {
+				err = multierr.Append(err, customErr)
+			} else {
+				flags = append(flags, f)
+			}
 		}
 	}
 
@@ -69,7 +73,7 @@ func buildFlags(cmd cli.Command) ([]urfavecli.Flag, error) {
 	return flags, err
 }
 
-type customFlag struct {
+type CustomFlag struct {
 	flag        cli.Flag
 	destination flag.Value
 
@@ -78,8 +82,8 @@ type customFlag struct {
 	Value       interface{}
 }
 
-func newCustomFlag(flag cli.Flag, value interface{}, destination flag.Value) *customFlag {
-	return &customFlag{
+func NewCustomFlag(flag cli.Flag, value interface{}, destination flag.Value) *CustomFlag {
+	return &CustomFlag{
 		flag:        flag,
 		destination: destination,
 		Usage:       flag.Description(),
@@ -88,7 +92,7 @@ func newCustomFlag(flag cli.Flag, value interface{}, destination flag.Value) *cu
 	}
 }
 
-func (f customFlag) Names() []string {
+func (f CustomFlag) Names() []string {
 	names := []string{f.flag.Name()}
 	if shorthand := f.flag.Shorthand(); shorthand != "" {
 		names = append(names, shorthand)
@@ -96,7 +100,7 @@ func (f customFlag) Names() []string {
 	return names
 }
 
-func (f customFlag) Apply(set *flag.FlagSet) error {
+func (f CustomFlag) Apply(set *flag.FlagSet) error {
 	for _, name := range f.Names() {
 		set.Var(f.destination, name, f.flag.Description())
 	}

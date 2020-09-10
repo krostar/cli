@@ -8,16 +8,19 @@ import (
 	"time"
 
 	"github.com/spf13/cobra"
-	"github.com/spf13/pflag"
-	"go.uber.org/multierr"
 
 	"github.com/krostar/cli"
 	"github.com/krostar/cli/app"
 	"github.com/krostar/cli/mapper"
 )
 
-func Execute(ctx context.Context, c *cli.CLI, args []string) error {
-	command, err := buildCommandRecursively(ctx, c)
+func Execute(ctx context.Context, c *cli.CLI, args []string, opts ...Option) error {
+	options := newOptions()
+	for _, o := range opts {
+		o(options)
+	}
+
+	command, err := buildCommandRecursively(ctx, c, options)
 	if err != nil {
 		return err
 	}
@@ -32,14 +35,14 @@ func Execute(ctx context.Context, c *cli.CLI, args []string) error {
 	return command.Execute()
 }
 
-func buildCommandRecursively(ctx context.Context, cli *cli.CLI) (*cobra.Command, error) {
-	command, err := buildCommand(ctx, cli.Name, cli.Command)
+func buildCommandRecursively(ctx context.Context, cli *cli.CLI, options *options) (*cobra.Command, error) {
+	command, err := buildCommand(ctx, cli.Name, cli.Command, options)
 	if err != nil {
 		return nil, fmt.Errorf("unable to build spf13/cobra command %s: %w", cli.Name, err)
 	}
 
 	for _, sub := range cli.SubCommands {
-		subCommand, err := buildCommandRecursively(ctx, sub)
+		subCommand, err := buildCommandRecursively(ctx, sub, options)
 		if err != nil {
 			return nil, fmt.Errorf("unable to build spf13/cobra sub-command %s of command %s: %w", sub.Name, cli.Name, err)
 		}
@@ -49,7 +52,7 @@ func buildCommandRecursively(ctx context.Context, cli *cli.CLI) (*cobra.Command,
 	return command, nil
 }
 
-func buildCommand(ctx context.Context, commandName string, cmd cli.Command) (*cobra.Command, error) {
+func buildCommand(ctx context.Context, commandName string, cmd cli.Command, options *options) (*cobra.Command, error) {
 	var example string
 	if examples := mapper.Examples(cmd); examples != nil {
 		example = "  " + strings.Join(mapper.Examples(cmd), "\n  ")
@@ -74,11 +77,11 @@ func buildCommand(ctx context.Context, commandName string, cmd cli.Command) (*co
 		return nil, fmt.Errorf("pre-flag-definition hook failed: %w", err)
 	}
 
-	if err := buildFlags(command.Flags(), mapper.Flags(cmd)); err != nil {
+	if err := buildFlags(command.Flags(), mapper.Flags(cmd), options); err != nil {
 		return nil, fmt.Errorf("cobra flags build failed: %w", err)
 	}
 
-	if err := buildFlags(command.PersistentFlags(), mapper.PersistentFlags(cmd)); err != nil {
+	if err := buildFlags(command.PersistentFlags(), mapper.PersistentFlags(cmd), options); err != nil {
 		return nil, fmt.Errorf("cobra flags build failed: %w", err)
 	}
 
@@ -151,45 +154,4 @@ func hooksFromHooks(ctx context.Context, c *cobra.Command, hooks *cli.Hooks) {
 		}
 		return hooks.AfterCommandExecution(ctx)
 	}
-}
-
-func buildFlags(set *pflag.FlagSet, flags []cli.Flag) error {
-	var err error
-
-	for _, flag := range flags {
-		switch dest := flag.Destination().(type) {
-		case *bool:
-			set.BoolVarP(dest, flag.Name(), flag.Shorthand(), *dest, flag.Description())
-		case *[]bool:
-			set.BoolSliceVarP(dest, flag.Name(), flag.Shorthand(), *dest, flag.Description())
-		case *string:
-			set.StringVarP(dest, flag.Name(), flag.Shorthand(), *dest, flag.Description())
-		case *[]string:
-			set.StringSliceVarP(dest, flag.Name(), flag.Shorthand(), *dest, flag.Description())
-		case *int:
-			set.IntVarP(dest, flag.Name(), flag.Shorthand(), *dest, flag.Description())
-		case *[]int:
-			set.IntSliceVarP(dest, flag.Name(), flag.Shorthand(), *dest, flag.Description())
-		case *uint:
-			set.UintVarP(dest, flag.Name(), flag.Shorthand(), *dest, flag.Description())
-		case *[]uint:
-			set.UintSliceVarP(dest, flag.Name(), flag.Shorthand(), *dest, flag.Description())
-		case *float32:
-			set.Float32VarP(dest, flag.Name(), flag.Shorthand(), *dest, flag.Description())
-		case *[]float32:
-			set.VarP(newFlagFloat32Value(*dest, dest), flag.Name(), flag.Shorthand(), flag.Description())
-		case *float64:
-			set.Float64VarP(dest, flag.Name(), flag.Shorthand(), *dest, flag.Description())
-		case *[]float64:
-			set.VarP(newFlagFloat64Value(*dest, dest), flag.Name(), flag.Shorthand(), flag.Description())
-		case *time.Duration:
-			set.DurationVarP(dest, flag.Name(), flag.Shorthand(), *dest, flag.Description())
-		case *[]time.Duration:
-			set.DurationSliceVarP(dest, flag.Name(), flag.Shorthand(), *dest, flag.Description())
-		default:
-			err = multierr.Append(err, fmt.Errorf("unhandled flag type: %T", dest))
-		}
-	}
-
-	return err
 }

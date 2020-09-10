@@ -7,14 +7,14 @@ import (
 )
 
 type flagStringSlice struct {
-	*customFlag
+	*CustomFlag
 	*flagStringSliceValue
 }
 
 func newFlagStringSlice(flag cli.Flag, dest *[]string) *flagStringSlice {
 	v := &flagStringSliceValue{dest: dest}
 	return &flagStringSlice{
-		customFlag:           newCustomFlag(flag, *dest, v),
+		CustomFlag:           NewCustomFlag(flag, *dest, v),
 		flagStringSliceValue: v,
 	}
 }

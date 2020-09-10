@@ -13,13 +13,13 @@ import (
 func newFlagBoolSlice(flag cli.Flag, dest *[]bool) *flagBoolSlice {
 	v := &flagBoolSliceValue{dest: dest}
 	return &flagBoolSlice{
-		customFlag:         newCustomFlag(flag, *dest, v),
+		CustomFlag:         NewCustomFlag(flag, *dest, v),
 		flagBoolSliceValue: v,
 	}
 }
 
 type flagBoolSlice struct {
-	*customFlag
+	*CustomFlag
 	*flagBoolSliceValue
 }
 

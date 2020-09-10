@@ -9,14 +9,14 @@ import (
 )
 
 type flagDurationSlice struct {
-	*customFlag
+	*CustomFlag
 	*flagDurationSliceValue
 }
 
 func newFlagDurationSlice(flag cli.Flag, dest *[]time.Duration) *flagDurationSlice {
 	v := &flagDurationSliceValue{dest: dest}
 	return &flagDurationSlice{
-		customFlag:             newCustomFlag(flag, *dest, v),
+		CustomFlag:             NewCustomFlag(flag, *dest, v),
 		flagDurationSliceValue: v,
 	}
 }

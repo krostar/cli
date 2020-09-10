@@ -12,13 +12,13 @@ import (
 func newFlagFloat32(flag cli.Flag, dest *float32) *flagFloat32 {
 	v := &flagFloat32Value{dest: dest}
 	return &flagFloat32{
-		customFlag:       newCustomFlag(flag, *dest, v),
+		CustomFlag:       NewCustomFlag(flag, *dest, v),
 		flagFloat32Value: v,
 	}
 }
 
 type flagFloat32 struct {
-	*customFlag
+	*CustomFlag
 	*flagFloat32Value
 }
 
