@@ -13,22 +13,23 @@ const (
 	ctxExitLogger
 )
 
+// ContextWithMetadata wraps the provided context to add a global metadata store to the CLI.
 func ContextWithMetadata(ctx context.Context) context.Context {
 	metadata := make(map[interface{}]interface{})
 	ctx = context.WithValue(ctx, ctxMetadataKey, metadata)
 	return ctx
 }
 
+// SetMetadata associates a key to a value in the global CLI metadata store.
 func SetMetadata(ctx context.Context, key interface{}, value interface{}) {
-	meta, ok := ctx.Value(ctxMetadataKey).(map[interface{}]interface{})
-	if ok {
+	if meta, ok := ctx.Value(ctxMetadataKey).(map[interface{}]interface{}); ok {
 		meta[key] = value
 	}
 }
 
+// GetMetadata retrieves any value stores to the provided key, if any.
 func GetMetadata(ctx context.Context, key interface{}) interface{} {
-	meta, ok := ctx.Value(ctxMetadataKey).(map[interface{}]interface{})
-	if ok {
+	if meta, ok := ctx.Value(ctxMetadataKey).(map[interface{}]interface{}); ok {
 		return meta[key]
 	}
 	return nil

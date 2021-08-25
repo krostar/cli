@@ -8,7 +8,7 @@ import (
 	"github.com/krostar/cli"
 )
 
-func buildFlags(set *pflag.FlagSet, flags []cli.Flag, options *options) error {
+func setCobraFlagsFromCLIFlags(set *pflag.FlagSet, flags []cli.Flag, options *options) error {
 	var err error
 
 	for _, flag := range flags {

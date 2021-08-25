@@ -14,6 +14,7 @@ import (
 	"github.com/krostar/cli/mapper"
 )
 
+// Execute executes the CLI with the cobra backend.
 func Execute(ctx context.Context, c *cli.CLI, args []string, opts ...Option) error {
 	options := newOptions()
 	for _, o := range opts {
@@ -71,24 +72,24 @@ func buildCommand(ctx context.Context, commandName string, cmd cli.Command, opti
 	}
 
 	hooks := mapper.Hooks(cmd)
-	hooksFromHooks(ctx, command, hooks)
+	setCobraHooksFromCLIHooks(ctx, command, hooks)
 
 	if err := hooks.BeforeFlagsDefinition(ctx); err != nil {
 		return nil, fmt.Errorf("pre-flag-definition hook failed: %w", err)
 	}
 
-	if err := buildFlags(command.Flags(), mapper.Flags(cmd), options); err != nil {
+	if err := setCobraFlagsFromCLIFlags(command.Flags(), mapper.Flags(cmd), options); err != nil {
 		return nil, fmt.Errorf("cobra flags build failed: %w", err)
 	}
 
-	if err := buildFlags(command.PersistentFlags(), mapper.PersistentFlags(cmd), options); err != nil {
+	if err := setCobraFlagsFromCLIFlags(command.PersistentFlags(), mapper.PersistentFlags(cmd), options); err != nil {
 		return nil, fmt.Errorf("cobra flags build failed: %w", err)
 	}
 
 	return command, nil
 }
 
-func getDifferentsArgs(command *cobra.Command, args []string) ([]string, []string) {
+func getArgs(command *cobra.Command, args []string) ([]string, []string) {
 	argsSeparatedAt := command.ArgsLenAtDash()
 
 	switch {
@@ -105,7 +106,7 @@ func getDifferentsArgs(command *cobra.Command, args []string) ([]string, []strin
 
 func handlerFromCommand(ctx context.Context, cmd cli.Command) func(*cobra.Command, []string) error {
 	return func(c *cobra.Command, args []string) error {
-		args, dashedArgs := getDifferentsArgs(c, args)
+		args, dashedArgs := getArgs(c, args)
 
 		err := cmd.Execute(ctx, args, dashedArgs)
 
@@ -121,7 +122,7 @@ func handlerFromCommand(ctx context.Context, cmd cli.Command) func(*cobra.Comman
 	}
 }
 
-func hooksFromHooks(ctx context.Context, c *cobra.Command, hooks *cli.Hooks) {
+func setCobraHooksFromCLIHooks(ctx context.Context, c *cobra.Command, hooks *cli.Hooks) {
 	c.PersistentPreRunE = func(c *cobra.Command, args []string) error {
 		if parent := c.Parent(); parent != nil && parent.PersistentPreRunE != nil {
 			if err := parent.PersistentPreRunE(parent, args); err != nil {

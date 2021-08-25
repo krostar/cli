@@ -3,14 +3,12 @@ package example
 import (
 	"context"
 	"errors"
+	"fmt"
 
 	"github.com/krostar/cli"
-	"github.com/krostar/logger"
 )
 
-type CommandPrint struct {
-	logger logger.Logger
-}
+type CommandPrint struct{}
 
 func (cmd *CommandPrint) Usage() string {
 	return "pos args -- dashed args"
@@ -29,37 +27,21 @@ func (cmd *CommandPrint) Description() string {
 		"print prints at least one and maximum three arguments, and a unlimited number of dashed arguments"
 }
 
-func (cmd *CommandPrint) Hooks() *cli.Hooks {
-	return &cli.Hooks{
-		BeforeCommandExecution: func(ctx context.Context) error {
-			logger, err := getLogger(ctx)
-			if err != nil {
-				return err
-			}
-			cmd.logger = logger
-			return nil
-		},
-		BeforeFlagsDefinition: func(context.Context) error {
-			return nil
-		},
-	}
-}
-
 func (cmd CommandPrint) Execute(_ context.Context, args []string, dashedArgs []string) error {
-	cmd.logger.Info("print command")
-
 	if len(args) == 0 {
 		return cli.ErrorShowHelp(errors.New("there should be at least 1 arg to print"))
 	}
 	if len(args) > 3 {
-		return errors.New("there should be no more than 3 arg to print")
+		return errors.New("there should be no more than 3 args to print")
 	}
 
-	for _, arg := range args {
-		cmd.logger.WithField("type", "argument").Infof("%q", arg)
+	for i, arg := range args {
+		fmt.Printf("args[%d] = %s", i, arg)
 	}
-	for _, arg := range dashedArgs {
-		cmd.logger.WithField("type", "dashed argument").Infof("%q", arg)
+
+	for i, arg := range dashedArgs {
+		fmt.Printf("dashedArgs[%d] = %s", i, arg)
 	}
+
 	return nil
 }

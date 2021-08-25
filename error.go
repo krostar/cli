@@ -3,10 +3,12 @@ package cli
 import (
 	"context"
 	"errors"
+	"fmt"
 	"io"
 	"os"
 )
 
+// ShowHelpError defines a new type of error that can show the CLI help.
 type ShowHelpError interface {
 	error
 	ShowHelp() bool
@@ -23,29 +25,33 @@ func (she showHelpError) Error() string {
 	return ""
 }
 
+// ErrorShowHelp wraps provided error and tells the CLI to show usage help.
 func ErrorShowHelp(err error) error { return &showHelpError{err: err} }
 
+// ExitStatusError defines a new type of error that can change the CLI exit status.
 type ExitStatusError interface {
 	error
-	ExitStatus() int
+	ExitStatus() uint8
 }
 
 type exitStatusError struct {
 	error
-	status int
+	status uint8
 }
 
-func (ese exitStatusError) ExitStatus() int { return ese.status }
-func (ese exitStatusError) Unwrap() error   { return ese.error }
+func (ese exitStatusError) ExitStatus() uint8 { return ese.status }
+func (ese exitStatusError) Unwrap() error     { return ese.error }
 
-func ErrorWithExitStatus(err error, status int) error {
+// ErrorWithExitStatus wraps the provided error and tells the CLI to exit with provided code.
+func ErrorWithExitStatus(err error, status uint8) error {
 	return &exitStatusError{error: err, status: status}
 }
 
+// Exit exits the program and uses provided error to define program success or failure.
 func Exit(ctx context.Context, err error) {
 	var (
 		msg    string
-		status int
+		status uint8
 	)
 
 	if err != nil {
@@ -60,11 +66,13 @@ func Exit(ctx context.Context, err error) {
 
 	if msg != "" {
 		writer := getExitLogger(ctx)
-		_, _ = io.WriteString(writer, msg+"\n")
-		if closer, ok := writer.(io.Closer); ok {
-			_ = closer.Close()
+		if _, err := io.WriteString(writer, msg+"\n"); err != nil {
+			fmt.Printf("unable to write program exit message: %v", err)
+		}
+		if err := writer.Close(); err != nil {
+			fmt.Printf("unable to close writer: %v", err)
 		}
 	}
 
-	os.Exit(status)
+	os.Exit(int(status))
 }

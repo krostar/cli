@@ -12,7 +12,7 @@ import (
 // nolint: gochecknoglobals
 var (
 	name       = "app"                  // app name
-	version    = "0.0.0-0-gmaster"      // see https://semver.org/ to have a description of the format
+	version    = "0.0.0-0-gmaster"      // see https://semver.org/ for a description of the format
 	buildAtRaw = "1970-01-01T00:00:00Z" // build date in RFC3339 format
 
 	app *App // initialized through init() function
@@ -63,7 +63,8 @@ func New(name, version, buildAtRaw string) (*App, error) {
 	return &app, nil
 }
 
-// Init reset the global app with the provided values.
+// Init resets the global app with the provided values.
+// It should only be set once, during main initialization.
 func Init(name, version, buildAtRaw string) {
 	var err error
 
@@ -79,14 +80,14 @@ func Copy() *App {
 	return &app
 }
 
-// Name returns the app name as set at build injection.
+// Name returns the app name as set during app Init.
 func Name() string { return app.Name }
 
-// AlphaNumericName returns the app name with only alphanumeric caracters.
+// AlphaNumericName returns the app name with only alphanumeric characters.
 func AlphaNumericName() string { return app.AlphaNumericName }
 
-// Version returns the app version as set at build injection.
+// Version returns the app version as set during app Init.
 func Version() string { return app.Version }
 
-// BuiltAt returns the app built time as set at build injection.
+// BuiltAt returns the app built time as set during app Init.
 func BuiltAt() time.Time { return app.BuiltAt }

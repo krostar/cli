@@ -19,6 +19,7 @@ type (
 	iUsage           interface{ Usage() string }
 )
 
+// ShortDescription returns the command short description, the first description line.
 func ShortDescription(cmd cli.Command) string {
 	description := Description(cmd)
 	if firstLine, err := bufio.NewReader(strings.NewReader(description)).ReadString('\n'); err == nil || errors.Is(err, io.EOF) {
@@ -27,6 +28,7 @@ func ShortDescription(cmd cli.Command) string {
 	return description
 }
 
+// Description returns the command description.
 func Description(cmd cli.Command) string {
 	if get, ok := cmd.(iDescription); ok {
 		return get.Description()
@@ -34,6 +36,7 @@ func Description(cmd cli.Command) string {
 	return ""
 }
 
+// Examples returns the command examples.
 func Examples(cmd cli.Command) []string {
 	if get, ok := cmd.(iExamples); ok {
 		return get.Examples()
@@ -41,6 +44,7 @@ func Examples(cmd cli.Command) []string {
 	return nil
 }
 
+// Flags returns the command flags.
 func Flags(cmd cli.Command) []cli.Flag {
 	if get, ok := cmd.(iFlags); ok {
 		return get.Flags()
@@ -48,6 +52,7 @@ func Flags(cmd cli.Command) []cli.Flag {
 	return nil
 }
 
+// Hooks returns the command hooks, wth safe default values.
 func Hooks(cmd cli.Command) *cli.Hooks {
 	var hooks *cli.Hooks
 
@@ -56,7 +61,7 @@ func Hooks(cmd cli.Command) *cli.Hooks {
 	}
 
 	if hooks == nil {
-		hooks = &cli.Hooks{}
+		hooks = new(cli.Hooks)
 	}
 
 	noopHook := func(context.Context) error { return nil }
@@ -64,15 +69,19 @@ func Hooks(cmd cli.Command) *cli.Hooks {
 	if hooks.BeforeCommandExecution == nil {
 		hooks.BeforeCommandExecution = noopHook
 	}
+
 	if hooks.AfterCommandExecution == nil {
 		hooks.AfterCommandExecution = noopHook
 	}
+
 	if hooks.PersistentBeforeCommandExecution == nil {
 		hooks.PersistentBeforeCommandExecution = noopHook
 	}
+
 	if hooks.PersistentAfterCommandExecution == nil {
 		hooks.PersistentAfterCommandExecution = noopHook
 	}
+
 	if hooks.BeforeFlagsDefinition == nil {
 		hooks.BeforeFlagsDefinition = noopHook
 	}
@@ -80,6 +89,7 @@ func Hooks(cmd cli.Command) *cli.Hooks {
 	return hooks
 }
 
+// PersistentFlags returns the command persistent flags.
 func PersistentFlags(cmd cli.Command) []cli.Flag {
 	if get, ok := cmd.(iPersistentFlags); ok {
 		return get.PersistentFlags()
@@ -87,6 +97,7 @@ func PersistentFlags(cmd cli.Command) []cli.Flag {
 	return nil
 }
 
+// Usage returns the command usage.
 func Usage(cmd cli.Command) string {
 	if get, ok := cmd.(iUsage); ok {
 		return " " + get.Usage()
