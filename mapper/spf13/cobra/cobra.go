@@ -5,7 +5,6 @@ import (
 	"errors"
 	"fmt"
 	"strings"
-	"time"
 
 	"github.com/spf13/cobra"
 
@@ -26,7 +25,12 @@ func Execute(ctx context.Context, c *cli.CLI, args []string, opts ...Option) err
 		return err
 	}
 	command.Use = app.Name()
-	command.Version = fmt.Sprintf("%s, compiled %s", app.Version(), app.BuiltAt().Local().Format(time.RFC3339))
+
+	versionCommand, err := buildCommand(ctx, "version", new(commandVersion), options)
+	if err != nil {
+		return fmt.Errorf("unable to build version command: %v", err)
+	}
+	command.AddCommand(versionCommand)
 
 	if len(args) > 0 {
 		args = args[1:]
@@ -60,6 +64,11 @@ func buildCommand(ctx context.Context, commandName string, cmd cli.Command, opti
 	}
 
 	command := &cobra.Command{
+		CompletionOptions: cobra.CompletionOptions{
+			DisableDefaultCmd:   true,
+			DisableNoDescFlag:   true,
+			DisableDescriptions: true,
+		},
 		DisableAutoGenTag:     true,
 		DisableFlagsInUseLine: true,
 		Example:               example,
