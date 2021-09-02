@@ -20,7 +20,7 @@ func (she showHelpError) ShowHelp() bool { return true }
 func (she showHelpError) Unwrap() error  { return she.err }
 func (she showHelpError) Error() string {
 	if she.err != nil {
-		return "help requested: " + she.err.Error()
+		return she.err.Error()
 	}
 	return ""
 }
@@ -35,16 +35,22 @@ type ExitStatusError interface {
 }
 
 type exitStatusError struct {
-	error
+	err    error
 	status uint8
 }
 
 func (ese exitStatusError) ExitStatus() uint8 { return ese.status }
-func (ese exitStatusError) Unwrap() error     { return ese.error }
+func (ese exitStatusError) Unwrap() error     { return ese.err }
+func (ese exitStatusError) Error() string {
+	if ese.err != nil {
+		return ese.err.Error()
+	}
+	return ""
+}
 
 // ErrorWithExitStatus wraps the provided error and tells the CLI to exit with provided code.
 func ErrorWithExitStatus(err error, status uint8) error {
-	return &exitStatusError{error: err, status: status}
+	return &exitStatusError{err: err, status: status}
 }
 
 // Exit exits the program and uses provided error to define program success or failure.
@@ -61,6 +67,7 @@ func Exit(ctx context.Context, err error) {
 		} else {
 			status = 125
 		}
+
 		msg = err.Error()
 	}
 

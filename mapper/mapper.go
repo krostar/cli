@@ -11,6 +11,9 @@ import (
 )
 
 type (
+	iContext interface {
+		Context(context.Context) context.Context
+	}
 	iDescription     interface{ Description() string }
 	iExamples        interface{ Examples() []string }
 	iFlags           interface{ Flags() []cli.Flag }
@@ -18,6 +21,13 @@ type (
 	iPersistentFlags interface{ PersistentFlags() []cli.Flag }
 	iUsage           interface{ Usage() string }
 )
+
+func Context(cmd cli.Command, ctx context.Context) context.Context {
+	if get, ok := cmd.(iContext); ok {
+		return get.Context(ctx)
+	}
+	return ctx
+}
 
 // ShortDescription returns the command short description, the first description line.
 func ShortDescription(cmd cli.Command) string {

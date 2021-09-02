@@ -52,6 +52,8 @@ func Execute(ctx context.Context, c *cli.CLI, args []string, opts ...Option) err
 }
 
 func buildCommandRecursively(ctx context.Context, cli *cli.CLI, options *options) (*urfavecli.Command, error) {
+	ctx = mapper.Context(cli.Command, ctx)
+
 	command, err := buildCommand(ctx, cli.Name, cli.Command, options)
 	if err != nil {
 		return nil, fmt.Errorf("unable to build urfave/cli command %s: %w", cli.Name, err)

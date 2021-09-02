@@ -41,6 +41,8 @@ func Execute(ctx context.Context, c *cli.CLI, args []string, opts ...Option) err
 }
 
 func buildCommandRecursively(ctx context.Context, cli *cli.CLI, options *options) (*cobra.Command, error) {
+	ctx = mapper.Context(cli.Command, ctx)
+
 	command, err := buildCommand(ctx, cli.Name, cli.Command, options)
 	if err != nil {
 		return nil, fmt.Errorf("unable to build spf13/cobra command %s: %w", cli.Name, err)
@@ -124,7 +126,6 @@ func handlerFromCommand(ctx context.Context, cmd cli.Command) func(*cobra.Comman
 			if showHelpErr.ShowHelp() {
 				_ = c.Usage()
 			}
-			err = errors.Unwrap(err)
 		}
 
 		return err
