@@ -6,30 +6,32 @@ import (
 	"os/signal"
 )
 
-type ctxKey uint8
-
-const (
-	ctxMetadataKey ctxKey = iota
-	ctxExitLogger
+type (
+	ctxKey      uint8
+	ctxMetadata map[any]any
 )
 
-// ContextWithMetadata wraps the provided context to add a global metadata store to the CLI.
-func ContextWithMetadata(ctx context.Context) context.Context {
-	metadata := make(map[interface{}]interface{})
-	ctx = context.WithValue(ctx, ctxMetadataKey, metadata)
-	return ctx
+const (
+	ctxKeyMetadata ctxKey = iota
+	ctxKeyExitLogger
+)
+
+// NewContextWithMetadata wraps the provided context to create a global metadata store to the CLI.
+// It helps to pass dependencies across commands tree.
+func NewContextWithMetadata(ctx context.Context) context.Context {
+	return context.WithValue(ctx, ctxKeyMetadata, make(ctxMetadata))
 }
 
-// SetMetadata associates a key to a value in the global CLI metadata store.
-func SetMetadata(ctx context.Context, key interface{}, value interface{}) {
-	if meta, ok := ctx.Value(ctxMetadataKey).(map[interface{}]interface{}); ok {
+// SetMetadataInContext associates a key to a value in the global CLI metadata store.
+func SetMetadataInContext(ctx context.Context, key any, value any) {
+	if meta, ok := ctx.Value(ctxKeyMetadata).(ctxMetadata); ok {
 		meta[key] = value
 	}
 }
 
-// GetMetadata retrieves any value stores to the provided key, if any.
-func GetMetadata(ctx context.Context, key interface{}) interface{} {
-	if meta, ok := ctx.Value(ctxMetadataKey).(map[interface{}]interface{}); ok {
+// GetMetadataFromContext retrieves any value stores to the provided key, if any.
+func GetMetadataFromContext(ctx context.Context, key any) any {
+	if meta, ok := ctx.Value(ctxKeyMetadata).(ctxMetadata); ok {
 		return meta[key]
 	}
 	return nil
@@ -38,7 +40,7 @@ func GetMetadata(ctx context.Context, key interface{}) interface{} {
 // NewContextCancelableBySignal creates a new context that cancels itself when provided signals are triggered.
 func NewContextCancelableBySignal(signals ...os.Signal) (context.Context, func()) {
 	ctx, cancel := context.WithCancel(context.Background())
-	ctx = ContextWithMetadata(ctx)
+	ctx = NewContextWithMetadata(ctx)
 
 	if len(signals) == 0 {
 		return ctx, cancel

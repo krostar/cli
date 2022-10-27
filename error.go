@@ -1,37 +1,36 @@
 package cli
 
-import (
-	"context"
-	"errors"
-	"fmt"
-	"io"
-	"os"
-)
-
-// ShowHelpError defines a new type of error that can show the CLI help.
+// ShowHelpError defines a new type of error that defines whenever the error should display the command help before the error message.
 type ShowHelpError interface {
 	error
 	ShowHelp() bool
 }
 
+// NewErrorWithHelp wraps provided error and tells the CLI to show usage help.
+func NewErrorWithHelp(err error) error {
+	return &showHelpError{err: err}
+}
+
 type showHelpError struct{ err error }
 
-func (she showHelpError) ShowHelp() bool { return true }
-func (she showHelpError) Unwrap() error  { return she.err }
-func (she showHelpError) Error() string {
-	if she.err != nil {
-		return she.err.Error()
+func (e showHelpError) ShowHelp() bool { return true }
+func (e showHelpError) Unwrap() error  { return e.err }
+func (e showHelpError) Error() string {
+	if e.err != nil {
+		return e.err.Error()
 	}
 	return ""
 }
 
-// ErrorShowHelp wraps provided error and tells the CLI to show usage help.
-func ErrorShowHelp(err error) error { return &showHelpError{err: err} }
-
-// ExitStatusError defines a new type of error that can change the CLI exit status.
+// ExitStatusError defines a new type of error that allow the customization of the CLI exit status.
 type ExitStatusError interface {
 	error
 	ExitStatus() uint8
+}
+
+// NewErrorWithExitStatus wraps the provided error and tells the CLI to exit with provided code.
+func NewErrorWithExitStatus(err error, status uint8) error {
+	return &exitStatusError{err: err, status: status}
 }
 
 type exitStatusError struct {
@@ -39,47 +38,11 @@ type exitStatusError struct {
 	status uint8
 }
 
-func (ese exitStatusError) ExitStatus() uint8 { return ese.status }
-func (ese exitStatusError) Unwrap() error     { return ese.err }
-func (ese exitStatusError) Error() string {
-	if ese.err != nil {
-		return ese.err.Error()
+func (e exitStatusError) ExitStatus() uint8 { return e.status }
+func (e exitStatusError) Unwrap() error     { return e.err }
+func (e exitStatusError) Error() string {
+	if e.err != nil {
+		return e.err.Error()
 	}
 	return ""
-}
-
-// ErrorWithExitStatus wraps the provided error and tells the CLI to exit with provided code.
-func ErrorWithExitStatus(err error, status uint8) error {
-	return &exitStatusError{err: err, status: status}
-}
-
-// Exit exits the program and uses provided error to define program success or failure.
-func Exit(ctx context.Context, err error) {
-	var (
-		msg    string
-		status uint8
-	)
-
-	if err != nil {
-		var errWithStatus ExitStatusError
-		if errors.As(err, &errWithStatus) {
-			status = errWithStatus.ExitStatus()
-		} else {
-			status = 125
-		}
-
-		msg = err.Error()
-	}
-
-	if msg != "" {
-		writer := getExitLogger(ctx)
-		if _, err := io.WriteString(writer, msg+"\n"); err != nil {
-			fmt.Printf("unable to write program exit message: %v", err)
-		}
-		if err := writer.Close(); err != nil {
-			fmt.Printf("unable to close writer: %v", err)
-		}
-	}
-
-	os.Exit(int(status))
 }
