@@ -10,7 +10,7 @@ type builtins interface {
 }
 
 func builtinFromString[T builtins](raw string) (T, error) {
-	newT := *new(T)
+	newT := *new(T) //nolint: gocritic // newDeref can't be fixed to T(nil)
 
 	switch t := any(newT).(type) {
 	case bool:
@@ -62,10 +62,11 @@ func builtinFromString[T builtins](raw string) (T, error) {
 		v, err := strconv.ParseUint(raw, 10, 64)
 		return any(uint(v)).(T), err
 	default:
-		return newT, fmt.Errorf("unhandled type %v", t)
+		return newT, fmt.Errorf("unhandled type %T", t)
 	}
 }
 
+//nolint:gomnd // don't lint for hardcoded number for precision
 func builtinToString[T builtins](t T) (string, error) {
 	switch t := any(t).(type) {
 	case bool:

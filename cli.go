@@ -1,6 +1,6 @@
 package cli
 
-// CLI stores the settings (name, commands, ...) associated to the CLI.
+// CLI stores the settings associated to the CLI.
 type CLI struct {
 	Name        string
 	Command     Command

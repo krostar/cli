@@ -48,7 +48,7 @@ func (cmd *CommandPrint) Flags() []cli.Flag {
 	}
 }
 
-func (cmd *CommandPrint) Execute(_ context.Context, args []string, dashedArgs []string) error {
+func (cmd *CommandPrint) Execute(_ context.Context, args, dashedArgs []string) error {
 	if len(args) == 0 {
 		return cli.NewErrorWithHelp(errors.New("there should be at least 1 arg to print"))
 	}

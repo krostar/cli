@@ -23,7 +23,7 @@ func NewContextWithMetadata(ctx context.Context) context.Context {
 }
 
 // SetMetadataInContext associates a key to a value in the global CLI metadata store.
-func SetMetadataInContext(ctx context.Context, key any, value any) {
+func SetMetadataInContext(ctx context.Context, key, value any) {
 	if meta, ok := ctx.Value(ctxKeyMetadata).(ctxMetadata); ok {
 		meta[key] = value
 	}

@@ -11,7 +11,7 @@ import (
 )
 
 // Context checks whenever command implements interface, with safe default value.
-func Context(cmd cli.Command, ctx context.Context) context.Context {
+func Context(cmd cli.Command, ctx context.Context) context.Context { //nolint:revive // context-as-argument is voluntarily not respected here to follow other commands signature.
 	if get, ok := cmd.(cli.CommandContext); ok {
 		return get.Context(ctx)
 	}

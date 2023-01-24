@@ -13,8 +13,8 @@ func NewErrorWithHelp(err error) error {
 
 type showHelpError struct{ err error }
 
-func (e showHelpError) ShowHelp() bool { return true }
-func (e showHelpError) Unwrap() error  { return e.err }
+func (showHelpError) ShowHelp() bool  { return true }
+func (e showHelpError) Unwrap() error { return e.err }
 func (e showHelpError) Error() string {
 	if e.err != nil {
 		return e.err.Error()

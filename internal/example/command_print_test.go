@@ -5,8 +5,9 @@ import (
 	"context"
 	"testing"
 
-	"github.com/krostar/cli"
 	"github.com/stretchr/testify/assert"
+
+	"github.com/krostar/cli"
 )
 
 func Test_CommandPrint_implements_Command(t *testing.T) {

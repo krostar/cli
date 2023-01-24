@@ -13,6 +13,6 @@ func (CommandRoot) Description() string {
 The main goal of this app is to demonstrate how easy it is to switch from one cli backend to another.`
 }
 
-func (cmd CommandRoot) Execute(_ context.Context, _ []string, _ []string) error {
+func (cmd CommandRoot) Execute(_ context.Context, _, _ []string) error {
 	return cli.NewErrorWithExitStatus(cli.NewErrorWithHelp(nil), 0)
 }

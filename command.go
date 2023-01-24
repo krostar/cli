@@ -7,7 +7,7 @@ import (
 type (
 	// Command defines the minimal interface required to execute a CLI command.
 	Command interface {
-		Execute(ctx context.Context, args []string, dashedArgs []string) error
+		Execute(ctx context.Context, args, dashedArgs []string) error
 	}
 
 	// CommandContext defines a way to propagate a custom context to child commands.

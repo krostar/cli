@@ -29,7 +29,7 @@ type FlagValuer interface {
 //	shortName is the short flagValue name ; usually 1 character, like -s ; can be empty.
 //	description is a short text explaining the flagValue ; can be empty.
 //	valuer provide the way to set value to the destination.
-func NewCustomFlag(longName string, shortName string, valuer FlagValuer, description string) Flag {
+func NewCustomFlag(longName, shortName string, valuer FlagValuer, description string) Flag {
 	if longName == "" && shortName == "" {
 		panic("longName and/or shortName must be non-empty")
 	}

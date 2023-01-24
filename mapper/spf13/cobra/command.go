@@ -7,6 +7,7 @@ import (
 	"strings"
 
 	"github.com/spf13/cobra"
+	"go.uber.org/multierr"
 
 	"github.com/krostar/cli"
 	mapper "github.com/krostar/cli/mapper/internal"
@@ -86,7 +87,7 @@ func cobraHandlerFromCLIHandler(ctx context.Context, cmd cli.Command) func(*cobr
 		var showHelpErr cli.ShowHelpError
 		if errors.As(err, &showHelpErr) {
 			if showHelpErr.ShowHelp() {
-				_ = c.Usage()
+				err = multierr.Append(err, c.Usage())
 			}
 		}
 

@@ -11,7 +11,7 @@ import (
 //	shortName is the short flagValue name ; usually 1 character, like -s ; can be empty.
 //	destination is a pointer on the variable on which flagValue's value will be stored ; cannot be nil.
 //	description is a short text explaining the flagValue ; can be empty.
-func NewSliceFlag[T builtins](longName string, shortName string, destination *[]T, description string) Flag {
+func NewSliceFlag[T builtins](longName, shortName string, destination *[]T, description string) Flag {
 	return NewCustomFlag(longName, shortName, &flagBuiltinSliceValue[T]{values: destination}, description)
 }
 

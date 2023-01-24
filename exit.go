@@ -39,12 +39,12 @@ func Exit(ctx context.Context, err error, options ...ExitOption) {
 
 	if msg != "" {
 		if _, err := io.WriteString(writer, msg+"\n"); err != nil {
-			_, _ = os.Stderr.WriteString(fmt.Sprintf("unable to write program exit message: %v", err))
+			_, _ = os.Stderr.WriteString(fmt.Sprintf("unable to write program exit message: %v", err)) //nolint:errcheck // we can't properly handle writing error on stderr
 		}
 	}
 
 	if err := writer.Close(); err != nil {
-		_, _ = os.Stderr.WriteString(fmt.Sprintf("unable to close writer: %v", err))
+		_, _ = os.Stderr.WriteString(fmt.Sprintf("unable to close writer: %v", err)) //nolint:errcheck // we can't properly handle writing error on stderr
 	}
 
 	o.exitFunc(int(status))

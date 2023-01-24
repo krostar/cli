@@ -87,7 +87,7 @@ func Test_PersistentFlags(t *testing.T) {
 	})
 }
 
-func Test_Hook(t *testing.T) {
+func Test_Hook(t *testing.T) { //nolint: dupl // Test_Hook is nearly the same func as Test_PersistentHook because is differences between Hook and PersistentHook are small.
 	ctx := context.Background()
 
 	t.Run("implemented", func(t *testing.T) {
@@ -116,7 +116,7 @@ func Test_Hook(t *testing.T) {
 	})
 }
 
-func Test_PersistentHook(t *testing.T) {
+func Test_PersistentHook(t *testing.T) { //nolint: dupl // Test_Hook is nearly the same func as Test_PersistentHook because is differences between Hook and PersistentHook are small.
 	ctx := context.Background()
 
 	t.Run("implemented", func(t *testing.T) {
@@ -147,38 +147,39 @@ func Test_PersistentHook(t *testing.T) {
 
 type commandSimple struct{}
 
-func (c commandSimple) Execute(ctx context.Context, args []string, dashedArgs []string) error {
+func (commandSimple) Execute(context.Context, []string, []string) error {
 	return nil
 }
 
 type commandWithAll struct{}
 
-func (c commandWithAll) Execute(context.Context, []string, []string) error {
+func (commandWithAll) Execute(context.Context, []string, []string) error {
 	return nil
 }
 
-func (c commandWithAll) Usage() string {
+func (commandWithAll) Usage() string {
 	return "usage"
 }
 
-func (c commandWithAll) Examples() []string {
+func (commandWithAll) Examples() []string {
 	return []string{"example"}
 }
 
-func (c commandWithAll) Description() string {
+func (commandWithAll) Description() string {
 	return "short description\nlong description"
 }
 
-func (c commandWithAll) Context(ctx context.Context) context.Context {
-	return context.WithValue(ctx, "foo", "value")
+func (commandWithAll) Context(ctx context.Context) context.Context {
+	type key string
+	return context.WithValue(ctx, key("foo"), "value")
 }
 
-func (c commandWithAll) Flags() []cli.Flag {
+func (commandWithAll) Flags() []cli.Flag {
 	var b bool
 	return []cli.Flag{cli.NewFlag[bool]("llong", "s", &b, "descr")}
 }
 
-func (c commandWithAll) Hook() *cli.Hook {
+func (commandWithAll) Hook() *cli.Hook {
 	return &cli.Hook{
 		BeforeCommandExecution: func(ctx context.Context) error {
 			return errors.New("hook")
@@ -186,12 +187,12 @@ func (c commandWithAll) Hook() *cli.Hook {
 	}
 }
 
-func (c commandWithAll) PersistentFlags() []cli.Flag {
+func (commandWithAll) PersistentFlags() []cli.Flag {
 	var b bool
 	return []cli.Flag{cli.NewFlag[bool]("plong", "s", &b, "descr")}
 }
 
-func (c commandWithAll) PersistentHook() *cli.Hook {
+func (commandWithAll) PersistentHook() *cli.Hook {
 	return &cli.Hook{
 		BeforeCommandExecution: func(ctx context.Context) error {
 			return errors.New("persistent hook")
