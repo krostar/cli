@@ -87,7 +87,7 @@ func Test_PersistentFlags(t *testing.T) {
 	})
 }
 
-func Test_Hook(t *testing.T) { //nolint: dupl // Test_Hook is nearly the same func as Test_PersistentHook because is differences between Hook and PersistentHook are small.
+func Test_Hook(t *testing.T) {
 	ctx := context.Background()
 
 	t.Run("implemented", func(t *testing.T) {
@@ -116,7 +116,7 @@ func Test_Hook(t *testing.T) { //nolint: dupl // Test_Hook is nearly the same fu
 	})
 }
 
-func Test_PersistentHook(t *testing.T) { //nolint: dupl // Test_Hook is nearly the same func as Test_PersistentHook because is differences between Hook and PersistentHook are small.
+func Test_PersistentHook(t *testing.T) {
 	ctx := context.Background()
 
 	t.Run("implemented", func(t *testing.T) {
