@@ -89,23 +89,19 @@ func Hook(cmd cli.Command) *cli.Hook {
 		hooks.AfterCommandExecution = noopHook
 	}
 
-	if hooks.BeforeFlagsDefinition == nil {
-		hooks.BeforeFlagsDefinition = noopHook
-	}
-
 	return hooks
 }
 
 // PersistentHook checks whenever command implements interface, with safe default value.
-func PersistentHook(cmd cli.Command) *cli.Hook {
-	var hooks *cli.Hook
+func PersistentHook(cmd cli.Command) *cli.PersistentHook {
+	var hooks *cli.PersistentHook
 
 	if get, ok := cmd.(cli.CommandPersistentHook); ok {
 		hooks = get.PersistentHook()
 	}
 
 	if hooks == nil {
-		hooks = new(cli.Hook)
+		hooks = new(cli.PersistentHook)
 	}
 
 	noopHook := func(context.Context) error { return nil }

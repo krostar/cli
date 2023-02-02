@@ -93,24 +93,20 @@ func Test_Hook(t *testing.T) {
 	t.Run("implemented", func(t *testing.T) {
 		hook := Hook(new(commandWithAll))
 		require.NotNil(t, hook)
-		assert.NotNil(t, hook.BeforeFlagsDefinition)
 		assert.NotNil(t, hook.BeforeCommandExecution)
 		assert.NotNil(t, hook.AfterCommandExecution)
 
 		err := hook.BeforeCommandExecution(ctx)
 		assert.Equal(t, "hook", err.Error())
-		assert.NoError(t, hook.BeforeFlagsDefinition(ctx))
 		assert.NoError(t, hook.AfterCommandExecution(ctx))
 	})
 
 	t.Run("not implemented", func(t *testing.T) {
 		hook := Hook(new(commandSimple))
 		require.NotNil(t, hook)
-		assert.NotNil(t, hook.BeforeFlagsDefinition)
 		assert.NotNil(t, hook.BeforeCommandExecution)
 		assert.NotNil(t, hook.AfterCommandExecution)
 
-		assert.NoError(t, hook.BeforeFlagsDefinition(ctx))
 		assert.NoError(t, hook.BeforeCommandExecution(ctx))
 		assert.NoError(t, hook.AfterCommandExecution(ctx))
 	})

@@ -95,8 +95,8 @@ func cobraHandlerFromCLIHandler(ctx context.Context, cmd cli.Command) func(*cobr
 	}
 }
 
-func setCobraHooksFromCLIHooks(ctx context.Context, c *cobra.Command, hook, persistentHook *cli.Hook) error {
-	if err := hook.BeforeFlagsDefinition(ctx); err != nil {
+func setCobraHooksFromCLIHooks(ctx context.Context, c *cobra.Command, hook *cli.Hook, persistentHook *cli.PersistentHook) error {
+	if err := persistentHook.BeforeFlagsDefinition(ctx); err != nil {
 		return fmt.Errorf("pre-flag-definition hook failed: %w", err)
 	}
 

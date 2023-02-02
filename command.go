@@ -1,8 +1,6 @@
 package cli
 
-import (
-	"context"
-)
+import "context"
 
 type (
 	// Command defines the minimal interface required to execute a CLI command.
@@ -33,20 +31,20 @@ type (
 	// CommandPersistentHook defines some persistent callback called during command lifecycle.
 	// Differences between CommandHook and CommandPersistentHook is that executed command's
 	// hierarchy will also be called.
-	CommandPersistentHook interface{ PersistentHook() *Hook }
+	CommandPersistentHook interface{ PersistentHook() *PersistentHook }
 
 	// HookFunc defines the hook signature.
 	HookFunc func(ctx context.Context) error
 
 	// Hook defines callbacks to add custom behavior to the command lifecycle.
 	Hook struct {
-		BeforeFlagsDefinition  HookFunc
 		BeforeCommandExecution HookFunc
 		AfterCommandExecution  HookFunc
 	}
 
-	// PersistentHook defines callbacks to add custom behavior to the commands lifecycle.
+	// PersistentHook defines callbacks to add custom behavior to the command lifecycle.
 	PersistentHook struct {
+		BeforeFlagsDefinition  HookFunc
 		BeforeCommandExecution HookFunc
 		AfterCommandExecution  HookFunc
 	}
