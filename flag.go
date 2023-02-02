@@ -13,16 +13,6 @@ type Flag interface {
 	Description() string
 }
 
-// FlagValuer defines how to set and get the value of a flagValue.
-type FlagValuer interface {
-	// TypeRepr returns a representation of the underlying type of the flagValue. Example: 'int'.
-	TypeRepr() string
-	// ToString returns a text representation of the flagValue's value.
-	ToString() (string, error)
-	// FromString parses and set the provided flagValue value.
-	FromString(string) error
-}
-
 // NewCustomFlag creates a flagValue based on any underlying destination type.
 //
 //	longName is the long flagValue name, like --longname ; cannot be empty.
