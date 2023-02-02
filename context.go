@@ -38,13 +38,11 @@ func GetMetadataFromContext(ctx context.Context, key any) any {
 }
 
 // NewContextCancelableBySignal creates a new context that cancels itself when provided signals are triggered.
-func NewContextCancelableBySignal(signals ...os.Signal) (context.Context, func()) {
+func NewContextCancelableBySignal(sig os.Signal, sigs ...os.Signal) (context.Context, func()) {
+	signals := append([]os.Signal{sig}, sigs...)
+
 	ctx, cancel := context.WithCancel(context.Background())
 	ctx = NewContextWithMetadata(ctx)
-
-	if len(signals) == 0 {
-		return ctx, cancel
-	}
 
 	signalChan := make(chan os.Signal, 1)
 	clean := func() {
