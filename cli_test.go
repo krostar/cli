@@ -13,12 +13,14 @@ func Test_CLI(t *testing.T) {
 	cmd2 := new(command2)
 	cmd3 := new(command3)
 	cmd31 := new(command31)
+	cmd4 := new(command4)
 
 	cli := NewCommand("cmd0", cmd0).
 		AddCommand("cmd1", cmd1).
 		AddCommand("cmd2", cmd2).
-		Add(NewCommand("cmd3", cmd3).
-			AddCommand("cmd31", cmd31))
+		Add(NewCommand("cmd3", cmd3).AddCommand("cmd31", cmd31)).
+		Mount("cmd4", NewCommand("notcmd4", cmd4))
+
 	assert.Equal(t, &CLI{
 		Name:    "cmd0",
 		Command: cmd0,
@@ -44,6 +46,11 @@ func Test_CLI(t *testing.T) {
 					},
 				},
 			},
+			{
+				Name:        "cmd4",
+				Command:     cmd4,
+				SubCommands: nil,
+			},
 		},
 	}, cli)
 }
@@ -67,3 +74,7 @@ func (command3) Execute(context.Context, []string, []string) error { return nil 
 type command31 struct{}
 
 func (command31) Execute(context.Context, []string, []string) error { return nil }
+
+type command4 struct{}
+
+func (command4) Execute(context.Context, []string, []string) error { return nil }

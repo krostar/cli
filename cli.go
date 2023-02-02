@@ -22,7 +22,16 @@ func (cli *CLI) AddCommand(name string, cmd Command) *CLI {
 }
 
 // Add adds a whole new CLI as a subcommand of the CLI.
+// Name of the root command of the sub cli is used as mount name.
 func (cli *CLI) Add(sub *CLI) *CLI {
 	cli.SubCommands = append(cli.SubCommands, sub)
 	return cli
+}
+
+// Mount adds a whole new CLI as a subcommand of the CLI.
+// Provided name command of the cli is used as mount name.
+func (cli *CLI) Mount(name string, sub *CLI) *CLI {
+	ssub := *sub
+	ssub.Name = name
+	return cli.Add(&ssub)
 }
