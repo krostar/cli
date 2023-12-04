@@ -5,6 +5,7 @@ import (
 	"testing"
 
 	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 )
 
 func Test_ErrorWithHelp(t *testing.T) {
@@ -13,11 +14,11 @@ func Test_ErrorWithHelp(t *testing.T) {
 		helpErr := NewErrorWithHelp(rootErr)
 
 		assert.Equal(t, rootErr.Error(), helpErr.Error())
-		assert.True(t, errors.Is(helpErr, rootErr))
+		require.ErrorIs(t, helpErr, rootErr)
 
 		showHelpErr := new(ShowHelpError)
-		assert.ErrorAs(t, helpErr, showHelpErr)
-		assert.Equal(t, true, (*showHelpErr).ShowHelp())
+		require.ErrorAs(t, helpErr, showHelpErr)
+		assert.True(t, (*showHelpErr).ShowHelp())
 	})
 
 	t.Run("nil error", func(t *testing.T) {
@@ -25,8 +26,8 @@ func Test_ErrorWithHelp(t *testing.T) {
 		assert.Empty(t, helpErr.Error())
 
 		showHelpErr := new(ShowHelpError)
-		assert.ErrorAs(t, helpErr, showHelpErr)
-		assert.Equal(t, true, (*showHelpErr).ShowHelp())
+		require.ErrorAs(t, helpErr, showHelpErr)
+		assert.True(t, (*showHelpErr).ShowHelp())
 	})
 }
 
@@ -36,10 +37,10 @@ func Test_ErrorWithExitStatus(t *testing.T) {
 		helpErr := NewErrorWithExitStatus(rootErr, 42)
 
 		assert.Equal(t, rootErr.Error(), helpErr.Error())
-		assert.True(t, errors.Is(helpErr, rootErr))
+		require.ErrorIs(t, helpErr, rootErr)
 
 		showHelpErr := new(ExitStatusError)
-		assert.ErrorAs(t, helpErr, showHelpErr)
+		require.ErrorAs(t, helpErr, showHelpErr)
 		assert.Equal(t, uint8(42), (*showHelpErr).ExitStatus())
 	})
 
@@ -48,7 +49,7 @@ func Test_ErrorWithExitStatus(t *testing.T) {
 		assert.Empty(t, helpErr.Error())
 
 		showHelpErr := new(ExitStatusError)
-		assert.ErrorAs(t, helpErr, showHelpErr)
+		require.ErrorAs(t, helpErr, showHelpErr)
 		assert.Equal(t, uint8(42), (*showHelpErr).ExitStatus())
 	})
 }

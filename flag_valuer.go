@@ -12,7 +12,7 @@ type FlagValuer interface {
 	// ToString returns a text representation of the flagValue's value.
 	ToString() (string, error)
 	// FromString parses and set the provided flagValue value.
-	FromString(string) error
+	FromString(str string) error
 }
 
 // NewCustomFlagValuer creates a flag valuer from a parse function returning somethind that implements stringer.

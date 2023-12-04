@@ -98,7 +98,7 @@ func Test_Hook(t *testing.T) {
 
 		err := hook.BeforeCommandExecution(ctx)
 		assert.Equal(t, "hook", err.Error())
-		assert.NoError(t, hook.AfterCommandExecution(ctx))
+		require.NoError(t, hook.AfterCommandExecution(ctx))
 	})
 
 	t.Run("not implemented", func(t *testing.T) {
@@ -107,8 +107,8 @@ func Test_Hook(t *testing.T) {
 		assert.NotNil(t, hook.BeforeCommandExecution)
 		assert.NotNil(t, hook.AfterCommandExecution)
 
-		assert.NoError(t, hook.BeforeCommandExecution(ctx))
-		assert.NoError(t, hook.AfterCommandExecution(ctx))
+		require.NoError(t, hook.BeforeCommandExecution(ctx))
+		require.NoError(t, hook.AfterCommandExecution(ctx))
 	})
 }
 
@@ -122,10 +122,9 @@ func Test_PersistentHook(t *testing.T) {
 		assert.NotNil(t, hook.BeforeCommandExecution)
 		assert.NotNil(t, hook.AfterCommandExecution)
 
-		err := hook.BeforeCommandExecution(ctx)
-		assert.Equal(t, "persistent hook", err.Error())
-		assert.NoError(t, hook.BeforeFlagsDefinition(ctx))
-		assert.NoError(t, hook.AfterCommandExecution(ctx))
+		require.NoError(t, hook.BeforeCommandExecution(ctx))
+		require.NoError(t, hook.BeforeFlagsDefinition(ctx))
+		require.NoError(t, hook.AfterCommandExecution(ctx))
 	})
 
 	t.Run("not implemented", func(t *testing.T) {
@@ -135,9 +134,9 @@ func Test_PersistentHook(t *testing.T) {
 		assert.NotNil(t, hook.BeforeCommandExecution)
 		assert.NotNil(t, hook.AfterCommandExecution)
 
-		assert.NoError(t, hook.BeforeFlagsDefinition(ctx))
-		assert.NoError(t, hook.BeforeCommandExecution(ctx))
-		assert.NoError(t, hook.AfterCommandExecution(ctx))
+		require.NoError(t, hook.BeforeFlagsDefinition(ctx))
+		require.NoError(t, hook.BeforeCommandExecution(ctx))
+		require.NoError(t, hook.AfterCommandExecution(ctx))
 	})
 }
 

@@ -10,7 +10,7 @@ type (
 
 	// CommandContext defines a way to propagate a custom context to child commands.
 	CommandContext interface {
-		Context(context.Context) context.Context
+		Context(ctx context.Context) context.Context
 	}
 
 	// CommandDescription defines a way to set a description on the command.

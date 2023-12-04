@@ -5,6 +5,7 @@ import (
 	"testing"
 
 	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 
 	"github.com/krostar/cli"
 )
@@ -19,13 +20,13 @@ func Test_CommandRoot_Execute(t *testing.T) {
 	cmd := new(CommandRoot)
 
 	err := cmd.Execute(context.Background(), nil, nil)
-	assert.Error(t, err)
+	require.Error(t, err)
 
 	var showUsageErr cli.ShowHelpError
-	assert.ErrorAs(t, err, &showUsageErr)
+	require.ErrorAs(t, err, &showUsageErr)
 	assert.True(t, showUsageErr.ShowHelp())
 
 	var exitStatusErr cli.ExitStatusError
-	assert.ErrorAs(t, err, &exitStatusErr)
+	require.ErrorAs(t, err, &exitStatusErr)
 	assert.Equal(t, uint8(0), exitStatusErr.ExitStatus())
 }

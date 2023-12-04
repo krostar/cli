@@ -1,22 +1,17 @@
 {
   inputs = {
-    flake-utils.url = "github:numtide/flake-utils";
-    nixpkgs.url = "github:NixOS/nixpkgs/ca7455728c01bc198b14a37fa5e06d2e765fd2d6";
+    nixpkgs-unstable.url = "github:NixOS/nixpkgs/nixpkgs-unstable";
   };
 
-  outputs = {
-    self,
-    flake-utils,
-    nixpkgs,
-    ...
-  }:
-    flake-utils.lib.eachSystem (flake-utils.lib.defaultSystems ++ [flake-utils.lib.system.x86_64-darwin]) (
-      system: let
-        pkgs = import nixpkgs {
-          inherit system;
-        };
-      in {
-        devShells.default = import ./shell.nix {inherit pkgs;};
-      }
-    );
+  outputs = {nixpkgs-unstable, ...}: let
+    supportedSystems = ["aarch64-linux" "aarch64-darwin" "x86_64-linux" "x86_64-darwin"];
+    forEachSupportedSystems = f: builtins.listToAttrs (builtins.map (system: (nixpkgs-unstable.lib.nameValuePair system (f system))) supportedSystems);
+    pkgsForSystem = system: {
+      nixpkgs ? nixpkgs-unstable,
+      overlays ? [],
+    }: (import nixpkgs {inherit system overlays;});
+  in {
+    devShells = forEachSupportedSystems (system: {default = import ./shell.nix {pkgs = pkgsForSystem system {};};});
+    formatter = forEachSupportedSystems (system: let pkgs = pkgsForSystem system {}; in pkgs.alejandra);
+  };
 }

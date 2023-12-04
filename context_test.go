@@ -36,26 +36,26 @@ func Test_ctxMetadata(t *testing.T) {
 func Test_NewContextCancelableBySignal(t *testing.T) {
 	t.Run("calling cancel func cancels the context", func(t *testing.T) {
 		ctx, cancel := NewContextCancelableBySignal(syscall.SIGUSR1)
-		assert.NoError(t, ctx.Err())
+		require.NoError(t, ctx.Err())
 		cancel()
 		<-ctx.Done()
-		assert.Error(t, ctx.Err())
+		require.Error(t, ctx.Err())
 	})
 
 	t.Run("sending provided signal cancels the context", func(t *testing.T) {
 		ctx, cancel := NewContextCancelableBySignal(syscall.SIGUSR1)
 		defer cancel()
-		assert.NoError(t, ctx.Err())
-		assert.NoError(t, syscall.Kill(syscall.Getpid(), syscall.SIGUSR1))
+		require.NoError(t, ctx.Err())
+		require.NoError(t, syscall.Kill(syscall.Getpid(), syscall.SIGUSR1))
 		<-ctx.Done()
-		assert.Error(t, ctx.Err())
+		require.Error(t, ctx.Err())
 	})
 
 	t.Run("sending unknown signal keeps context intact", func(t *testing.T) {
 		ctx, cancel := NewContextCancelableBySignal(syscall.SIGUSR1)
 		defer cancel()
-		assert.NoError(t, ctx.Err())
-		assert.NoError(t, syscall.Kill(syscall.Getpid(), syscall.SIGUSR2))
-		assert.NoError(t, ctx.Err())
+		require.NoError(t, ctx.Err())
+		require.NoError(t, syscall.Kill(syscall.Getpid(), syscall.SIGUSR2))
+		require.NoError(t, ctx.Err())
 	})
 }

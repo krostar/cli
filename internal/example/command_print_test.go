@@ -6,6 +6,7 @@ import (
 	"testing"
 
 	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 
 	"github.com/krostar/cli"
 )
@@ -26,7 +27,7 @@ func Test_CommandPrint_Execute(t *testing.T) {
 		cmd := &CommandPrint{Writer: output}
 
 		err := cmd.Execute(ctx, []string{"foo", "bar"}, []string{"foofoo", "barbar"})
-		assert.NoError(t, err)
+		require.NoError(t, err)
 		assert.Equal(t, `args[0] = foo
 args[1] = bar
 dashedArgs[0] = foofoo
@@ -54,7 +55,7 @@ dashedArgs[1] = barbar
 				cmd := new(CommandPrint)
 
 				err := cmd.Execute(ctx, test.args, nil)
-				assert.Error(t, err)
+				require.Error(t, err)
 				assert.Contains(t, err.Error(), test.errorContains)
 			}
 		})

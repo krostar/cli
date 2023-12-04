@@ -4,6 +4,7 @@ import (
 	"testing"
 
 	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 )
 
 func Test_NewFlag(t *testing.T) {
@@ -15,10 +16,10 @@ func Test_NewFlag(t *testing.T) {
 	assert.Equal(t, "description", flag.Description())
 	assert.Equal(t, "int", flag.TypeRepr())
 
-	assert.Error(t, flag.FromString("abc"))
+	require.Error(t, flag.FromString("abc"))
 
-	assert.NoError(t, flag.FromString("  42 "))
+	require.NoError(t, flag.FromString("  42 "))
 	repr, err := flag.ToString()
-	assert.NoError(t, err)
+	require.NoError(t, err)
 	assert.Equal(t, "42", repr)
 }

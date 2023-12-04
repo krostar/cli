@@ -1,13 +1,17 @@
-{ pkgs ? import <nixpkgs> {}}:
-pkgs.mkShell {
+{pkgs}:
+pkgs.mkShellNoCC {
   nativeBuildInputs = with pkgs; [
-    bashInteractive
-    git
-    go_1_19
-    golangci-lint
-    gofumpt
+    act
+    alejandra
+    deadnix
     gci
+    git
+    go_1_21
+    gofumpt
+    golangci-lint
+    govulncheck
     shellcheck
+    statix
     yamllint
   ];
 }

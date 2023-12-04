@@ -10,7 +10,7 @@ type builtins interface {
 }
 
 func builtinFromString[T builtins](raw string) (T, error) {
-	newT := *new(T) //nolint: gocritic // newDeref can't be fixed to T(nil)
+	newT := *new(T)
 
 	switch t := any(newT).(type) {
 	case bool:
