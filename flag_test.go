@@ -6,33 +6,33 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
-func Test_NewCustomFlag(t *testing.T) {
+func Test_NewFlag(t *testing.T) {
 	var dest int
-	nonNilValuer := &flagBuiltinValue[int]{value: &dest}
+	nonNilValuer := &flagValuer[int]{value: &dest}
 
 	t.Run("ok", func(t *testing.T) {
-		assert.NotNil(t, NewCustomFlag("long", "", nonNilValuer, "foo"))
-		assert.NotNil(t, NewCustomFlag("", "s", nonNilValuer, "foo"))
-		assert.NotNil(t, NewCustomFlag("long", "s", nonNilValuer, "foo"))
-		assert.NotNil(t, NewCustomFlag("long", "s", nonNilValuer, ""))
+		assert.NotNil(t, NewFlag("long", "", nonNilValuer, "foo"))
+		assert.NotNil(t, NewFlag("", "s", nonNilValuer, "foo"))
+		assert.NotNil(t, NewFlag("long", "s", nonNilValuer, "foo"))
+		assert.NotNil(t, NewFlag("long", "s", nonNilValuer, ""))
 	})
 
 	t.Run("wrong setup", func(t *testing.T) {
 		t.Run("short and long names are unset", func(t *testing.T) {
 			assert.PanicsWithValue(t, "longName and/or shortName must be non-empty", func() {
-				NewCustomFlag("", "", nonNilValuer, "")
+				NewFlag("", "", nonNilValuer, "")
 			})
 		})
 
 		t.Run("short is set with more than one character", func(t *testing.T) {
 			assert.PanicsWithValue(t, "shortName must be one character long", func() {
-				NewCustomFlag("long", "notSoShort", nonNilValuer, "")
+				NewFlag("long", "notSoShort", nonNilValuer, "")
 			})
 		})
 
 		t.Run("nil valuer", func(t *testing.T) {
 			assert.PanicsWithValue(t, "a non-nil valuer is required", func() {
-				NewCustomFlag("long", "", nil, "")
+				NewFlag("long", "", nil, "")
 			})
 		})
 	})

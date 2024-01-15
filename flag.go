@@ -2,24 +2,24 @@ package cli
 
 // Flag defines a flagValue.
 type Flag interface {
-	// FlagValuer defines methods to get and set flagValue value.
+	// FlagValuer defines methods to get and set flag's value.
 	FlagValuer
 
-	// LongName if non-empty, defines the long name of the flagValue like --long.
+	// LongName if non-empty, defines the long name of the flag like --long.
 	LongName() string
-	// ShortName if non-empty, defines the short name of the flagValue like -s.
+	// ShortName if non-empty, defines the short name of the flag like -s.
 	ShortName() string
-	// Description describes the flagValue for display purpose.
+	// Description describes the flag display purpose.
 	Description() string
 }
 
-// NewCustomFlag creates a flagValue based on any underlying destination type.
+// NewFlag creates a Flag based on any underlying destination type.
 //
-//	longName is the long flagValue name, like --longname ; cannot be empty.
-//	shortName is the short flagValue name ; usually 1 character, like -s ; can be empty.
-//	description is a short text explaining the flagValue ; can be empty.
+//	longName is the long flag name, like --longname ; cannot be empty.
+//	shortName is the short flag name ; usually 1 character, like -s ; can be empty.
 //	valuer provide the way to set value to the destination.
-func NewCustomFlag(longName, shortName string, valuer FlagValuer, description string) Flag {
+//	description is a short text explaining the flag ; can be empty.
+func NewFlag(longName, shortName string, valuer FlagValuer, description string) Flag {
 	if longName == "" && shortName == "" {
 		panic("longName and/or shortName must be non-empty")
 	}

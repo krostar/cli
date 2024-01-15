@@ -1,8 +1,6 @@
 package spf13cobra
 
 import (
-	"fmt"
-
 	"github.com/spf13/pflag"
 
 	"github.com/krostar/cli"
@@ -24,10 +22,4 @@ func (flag *flagValuer) Type() string {
 	return flag.FlagValuer.TypeRepr()
 }
 
-func (flag *flagValuer) String() string {
-	repr, err := flag.FlagValuer.ToString()
-	if err != nil {
-		return fmt.Errorf("unable to convert flag value to string: %v", err).Error()
-	}
-	return repr
-}
+func (flag *flagValuer) String() string { return flag.FlagValuer.String() }

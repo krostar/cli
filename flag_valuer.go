@@ -5,35 +5,47 @@ import (
 	"strings"
 )
 
-// FlagValuer defines how to set and get the value of a flagValue.
+// FlagValuer defines how to set and get the value of a flag.
 type FlagValuer interface {
-	// TypeRepr returns a representation of the underlying type of the flagValue. Example: 'int'.
-	TypeRepr() string
-	// ToString returns a text representation of the flagValue's value.
-	ToString() (string, error)
-	// FromString parses and set the provided flagValue value.
+	// FromString parses and set the value.
 	FromString(str string) error
+	// String returns a representation of the value.
+	String() string
+	// TypeRepr returns a representation of the underlying type of the value. Example: 'int'.
+	TypeRepr() string
 }
 
-// NewCustomFlagValuer creates a flag valuer from a parse function returning somethind that implements stringer.
-func NewCustomFlagValuer[T fmt.Stringer](destination *T, parse func(string) (T, error)) FlagValuer {
+// NewFlagValuer creates a flag valuer from a parse and toString functions. It panics if any parameters are nil.
+func NewFlagValuer[T any](destination *T, parse func(string) (T, error), toString func(T) string) FlagValuer {
+	if destination == nil {
+		panic("destination is nil")
+	}
+
+	if parse == nil {
+		panic("parse is nil")
+	}
+
+	if toString == nil {
+		panic("toString is nil")
+	}
+
 	return &flagValuer[T]{
-		value: destination,
-		parse: parse,
+		value:    destination,
+		parse:    parse,
+		toString: toString,
 	}
 }
 
-type flagValuer[T fmt.Stringer] struct {
-	value *T
-	parse func(string) (T, error)
+// NewStringerFlagValuer creates a flag valuer from a parse function returning something that implements stringer.
+// See NewFlagValuer for more details.
+func NewStringerFlagValuer[T fmt.Stringer](destination *T, parse func(string) (T, error)) FlagValuer {
+	return NewFlagValuer(destination, parse, func(t T) string { return t.String() })
 }
 
-func (v *flagValuer[T]) TypeRepr() string {
-	return fmt.Sprintf("%T", *v.value)
-}
-
-func (v *flagValuer[T]) ToString() (string, error) {
-	return (*v.value).String(), nil
+type flagValuer[T any] struct {
+	value    *T
+	parse    func(string) (T, error)
+	toString func(T) string
 }
 
 func (v *flagValuer[T]) FromString(raw string) error {
@@ -43,6 +55,9 @@ func (v *flagValuer[T]) FromString(raw string) error {
 	}
 
 	*v.value = value
-
 	return nil
 }
+
+func (v *flagValuer[T]) String() string { return v.toString(*v.value) }
+
+func (v *flagValuer[T]) TypeRepr() string { return fmt.Sprintf("%T", *v.value) }

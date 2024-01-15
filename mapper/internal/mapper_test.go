@@ -171,7 +171,7 @@ func (commandWithAll) Context(ctx context.Context) context.Context {
 
 func (commandWithAll) Flags() []cli.Flag {
 	var b bool
-	return []cli.Flag{cli.NewFlag[bool]("llong", "s", &b, "descr")}
+	return []cli.Flag{cli.NewBuiltinFlag[bool]("llong", "s", &b, "descr")}
 }
 
 func (commandWithAll) Hook() *cli.Hook {
@@ -184,7 +184,7 @@ func (commandWithAll) Hook() *cli.Hook {
 
 func (commandWithAll) PersistentFlags() []cli.Flag {
 	var b bool
-	return []cli.Flag{cli.NewFlag[bool]("plong", "s", &b, "descr")}
+	return []cli.Flag{cli.NewBuiltinFlag[bool]("plong", "s", &b, "descr")}
 }
 
 func (commandWithAll) PersistentHook() *cli.Hook {

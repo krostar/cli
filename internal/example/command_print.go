@@ -42,9 +42,9 @@ func (cmd *CommandPrint) Description() string {
 
 func (cmd *CommandPrint) Flags() []cli.Flag {
 	return []cli.Flag{
-		cli.NewFlag("long-a", "a", &cmd.cfg.A, "displayed when 'a' is a parameter"),
-		cli.NewFlag("long-b", "b", &cmd.cfg.B, "displayed when 'b' is a parameter"),
-		cli.NewSliceFlag("long-c", "c", &cmd.cfg.C, "displayed when 'c' is a parameter"),
+		cli.NewBuiltinFlag("long-a", "a", &cmd.cfg.A, "displayed when 'a' is a parameter"),
+		cli.NewBuiltinFlag("long-b", "b", &cmd.cfg.B, "displayed when 'b' is a parameter"),
+		cli.NewBuiltinSliceFlag("long-c", "c", &cmd.cfg.C, "displayed when 'c' is a parameter"),
 	}
 }
 
