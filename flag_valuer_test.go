@@ -16,8 +16,11 @@ func Test_NewFlagValuer(t *testing.T) {
 
 		assert.Equal(t, "time.Duration", valuer.TypeRepr())
 
+		assert.False(t, valuer.IsSet())
 		require.Error(t, valuer.FromString("abc"))
+		assert.False(t, valuer.IsSet())
 		require.NoError(t, valuer.FromString("4s"))
+		assert.True(t, valuer.IsSet())
 		assert.Equal(t, time.Second*4, d)
 
 		value := valuer.String()
@@ -49,8 +52,11 @@ func Test_NewStringerFlagValuer(t *testing.T) {
 
 		assert.Equal(t, "time.Duration", valuer.TypeRepr())
 
+		assert.False(t, valuer.IsSet())
 		require.Error(t, valuer.FromString("abc"))
+		assert.False(t, valuer.IsSet())
 		require.NoError(t, valuer.FromString("4s"))
+		assert.True(t, valuer.IsSet())
 
 		value := valuer.String()
 		assert.Equal(t, "4s", value)

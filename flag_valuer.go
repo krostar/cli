@@ -9,6 +9,8 @@ import (
 type FlagValuer interface {
 	// FromString parses and set the value.
 	FromString(str string) error
+	// IsSet returns whether the flag value has been set.
+	IsSet() bool
 	// String returns a representation of the value.
 	String() string
 	// TypeRepr returns a representation of the underlying type of the value. Example: 'int'.
@@ -44,6 +46,7 @@ func NewStringerFlagValuer[T fmt.Stringer](destination *T, parse func(string) (T
 
 type flagValuer[T any] struct {
 	value    *T
+	changed  bool
 	parse    func(string) (T, error)
 	toString func(T) string
 }
@@ -55,8 +58,12 @@ func (v *flagValuer[T]) FromString(raw string) error {
 	}
 
 	*v.value = value
+	v.changed = true
+
 	return nil
 }
+
+func (v *flagValuer[T]) IsSet() bool { return v.changed }
 
 func (v *flagValuer[T]) String() string { return v.toString(*v.value) }
 
