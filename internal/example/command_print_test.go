@@ -5,19 +5,8 @@ import (
 	"context"
 	"testing"
 
-	"github.com/stretchr/testify/assert"
-	"github.com/stretchr/testify/require"
-
-	"github.com/krostar/cli"
+	"gotest.tools/v3/assert"
 )
-
-func Test_CommandPrint_implements_Command(t *testing.T) {
-	cmd := new(CommandPrint)
-	assert.Implements(t, (*cli.Command)(nil), cmd)
-	assert.Implements(t, (*cli.CommandUsage)(nil), cmd)
-	assert.Implements(t, (*cli.CommandExamples)(nil), cmd)
-	assert.Implements(t, (*cli.CommandDescription)(nil), cmd)
-}
 
 func Test_CommandPrint_Execute(t *testing.T) {
 	ctx := context.Background()
@@ -26,13 +15,12 @@ func Test_CommandPrint_Execute(t *testing.T) {
 		output := new(bytes.Buffer)
 		cmd := &CommandPrint{Writer: output}
 
-		err := cmd.Execute(ctx, []string{"foo", "bar"}, []string{"foofoo", "barbar"})
-		require.NoError(t, err)
-		assert.Equal(t, `args[0] = foo
+		assert.NilError(t, cmd.Execute(ctx, []string{"foo", "bar"}, []string{"foofoo", "barbar"}))
+		assert.Check(t, output.String() == `args[0] = foo
 args[1] = bar
 dashedArgs[0] = foofoo
 dashedArgs[1] = barbar
-`, output.String())
+`)
 	})
 
 	t.Run("ko", func(t *testing.T) {
@@ -55,8 +43,7 @@ dashedArgs[1] = barbar
 				cmd := new(CommandPrint)
 
 				err := cmd.Execute(ctx, test.args, nil)
-				require.Error(t, err)
-				assert.Contains(t, err.Error(), test.errorContains)
+				assert.ErrorContains(t, err, test.errorContains)
 			}
 		})
 	})

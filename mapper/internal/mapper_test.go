@@ -5,8 +5,7 @@ import (
 	"errors"
 	"testing"
 
-	"github.com/stretchr/testify/assert"
-	"github.com/stretchr/testify/require"
+	"gotest.tools/v3/assert"
 
 	"github.com/krostar/cli"
 )
@@ -14,76 +13,76 @@ import (
 func Test_Context(t *testing.T) {
 	t.Run("implemented", func(t *testing.T) {
 		ctx := context.TODO()
-		assert.NotEqual(t, ctx, Context(new(commandWithAll), ctx))
+		assert.Check(t, ctx != Context(new(commandWithAll), ctx))
 	})
 
 	t.Run("not implemented", func(t *testing.T) {
 		ctx := context.TODO()
-		assert.Equal(t, ctx, Context(new(commandSimple), ctx))
+		assert.Check(t, ctx == Context(new(commandSimple), ctx))
 	})
 }
 
 func Test_ShortDescription(t *testing.T) {
 	t.Run("implemented", func(t *testing.T) {
-		assert.Equal(t, "short description", ShortDescription(new(commandWithAll)))
+		assert.Check(t, ShortDescription(new(commandWithAll)) == "short description")
 	})
 
 	t.Run("not implemented", func(t *testing.T) {
-		assert.Equal(t, "", ShortDescription(new(commandSimple)))
+		assert.Check(t, ShortDescription(new(commandSimple)) == "")
 	})
 }
 
 func Test_Description(t *testing.T) {
 	t.Run("implemented", func(t *testing.T) {
-		assert.Equal(t, "short description\nlong description", Description(new(commandWithAll)))
+		assert.Check(t, Description(new(commandWithAll)) == "short description\nlong description")
 	})
 
 	t.Run("not implemented", func(t *testing.T) {
-		assert.Equal(t, "", Description(new(commandSimple)))
+		assert.Check(t, Description(new(commandSimple)) == "")
 	})
 }
 
 func Test_Examples(t *testing.T) {
 	t.Run("implemented", func(t *testing.T) {
-		assert.Equal(t, []string{"example"}, Examples(new(commandWithAll)))
+		assert.DeepEqual(t, Examples(new(commandWithAll)), []string{"example"})
 	})
 
 	t.Run("not implemented", func(t *testing.T) {
-		assert.Equal(t, []string(nil), Examples(new(commandSimple)))
+		assert.DeepEqual(t, Examples(new(commandSimple)), []string(nil))
 	})
 }
 
 func Test_Usage(t *testing.T) {
 	t.Run("implemented", func(t *testing.T) {
-		assert.Equal(t, "usage", Usage(new(commandWithAll)))
+		assert.Check(t, Usage(new(commandWithAll)) == "usage")
 	})
 
 	t.Run("not implemented", func(t *testing.T) {
-		assert.Equal(t, "", Usage(new(commandSimple)))
+		assert.Check(t, Usage(new(commandSimple)) == "")
 	})
 }
 
 func Test_Flags(t *testing.T) {
 	t.Run("implemented", func(t *testing.T) {
 		f := Flags(new(commandWithAll))
-		require.NotEmpty(t, f)
-		assert.Equal(t, "llong", f[0].LongName())
+		assert.Check(t, len(f) > 0)
+		assert.Check(t, f[0].LongName() == "llong")
 	})
 
 	t.Run("not implemented", func(t *testing.T) {
-		assert.Empty(t, Flags(new(commandSimple)))
+		assert.Check(t, len(Flags(new(commandSimple))) == 0)
 	})
 }
 
 func Test_PersistentFlags(t *testing.T) {
 	t.Run("implemented", func(t *testing.T) {
 		f := PersistentFlags(new(commandWithAll))
-		require.NotEmpty(t, f)
-		assert.Equal(t, "plong", f[0].LongName())
+		assert.Check(t, len(f) > 0)
+		assert.Check(t, f[0].LongName() == "plong")
 	})
 
 	t.Run("not implemented", func(t *testing.T) {
-		assert.Empty(t, PersistentFlags(new(commandSimple)))
+		assert.Check(t, len(PersistentFlags(new(commandSimple))) == 0)
 	})
 }
 
@@ -92,23 +91,22 @@ func Test_Hook(t *testing.T) {
 
 	t.Run("implemented", func(t *testing.T) {
 		hook := Hook(new(commandWithAll))
-		require.NotNil(t, hook)
-		assert.NotNil(t, hook.BeforeCommandExecution)
-		assert.NotNil(t, hook.AfterCommandExecution)
+		assert.Assert(t, hook != nil)
+		assert.Assert(t, hook.BeforeCommandExecution != nil)
+		assert.Assert(t, hook.AfterCommandExecution != nil)
 
-		err := hook.BeforeCommandExecution(ctx)
-		assert.Equal(t, "hook", err.Error())
-		require.NoError(t, hook.AfterCommandExecution(ctx))
+		assert.Error(t, hook.BeforeCommandExecution(ctx), "hook")
+		assert.NilError(t, hook.AfterCommandExecution(ctx))
 	})
 
 	t.Run("not implemented", func(t *testing.T) {
 		hook := Hook(new(commandSimple))
-		require.NotNil(t, hook)
-		assert.NotNil(t, hook.BeforeCommandExecution)
-		assert.NotNil(t, hook.AfterCommandExecution)
+		assert.Assert(t, hook != nil)
+		assert.Assert(t, hook.BeforeCommandExecution != nil)
+		assert.Assert(t, hook.AfterCommandExecution != nil)
 
-		require.NoError(t, hook.BeforeCommandExecution(ctx))
-		require.NoError(t, hook.AfterCommandExecution(ctx))
+		assert.NilError(t, hook.BeforeCommandExecution(ctx))
+		assert.NilError(t, hook.AfterCommandExecution(ctx))
 	})
 }
 
@@ -117,26 +115,26 @@ func Test_PersistentHook(t *testing.T) {
 
 	t.Run("implemented", func(t *testing.T) {
 		hook := PersistentHook(new(commandWithAll))
-		require.NotNil(t, hook)
-		assert.NotNil(t, hook.BeforeFlagsDefinition)
-		assert.NotNil(t, hook.BeforeCommandExecution)
-		assert.NotNil(t, hook.AfterCommandExecution)
+		assert.Assert(t, hook != nil)
+		assert.Assert(t, hook.BeforeFlagsDefinition != nil)
+		assert.Assert(t, hook.BeforeCommandExecution != nil)
+		assert.Assert(t, hook.AfterCommandExecution != nil)
 
-		require.NoError(t, hook.BeforeCommandExecution(ctx))
-		require.NoError(t, hook.BeforeFlagsDefinition(ctx))
-		require.NoError(t, hook.AfterCommandExecution(ctx))
+		assert.NilError(t, hook.BeforeCommandExecution(ctx))
+		assert.NilError(t, hook.BeforeFlagsDefinition(ctx))
+		assert.NilError(t, hook.AfterCommandExecution(ctx))
 	})
 
 	t.Run("not implemented", func(t *testing.T) {
 		hook := PersistentHook(new(commandSimple))
-		require.NotNil(t, hook)
-		assert.NotNil(t, hook.BeforeFlagsDefinition)
-		assert.NotNil(t, hook.BeforeCommandExecution)
-		assert.NotNil(t, hook.AfterCommandExecution)
+		assert.Assert(t, hook != nil)
+		assert.Assert(t, hook.BeforeFlagsDefinition != nil)
+		assert.Assert(t, hook.BeforeCommandExecution != nil)
+		assert.Assert(t, hook.AfterCommandExecution != nil)
 
-		require.NoError(t, hook.BeforeFlagsDefinition(ctx))
-		require.NoError(t, hook.BeforeCommandExecution(ctx))
-		require.NoError(t, hook.AfterCommandExecution(ctx))
+		assert.NilError(t, hook.BeforeFlagsDefinition(ctx))
+		assert.NilError(t, hook.BeforeCommandExecution(ctx))
+		assert.NilError(t, hook.AfterCommandExecution(ctx))
 	})
 }
 

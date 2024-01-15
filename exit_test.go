@@ -8,8 +8,7 @@ import (
 	"os"
 	"testing"
 
-	"github.com/stretchr/testify/assert"
-	"github.com/stretchr/testify/require"
+	"gotest.tools/v3/assert"
 )
 
 type bufferThatCloses struct {
@@ -39,10 +38,10 @@ func Test_Exit(t *testing.T) {
 			}),
 		)
 
-		require.NotNil(t, exitStatus)
-		assert.Equal(t, 0, *exitStatus)
-		assert.Empty(t, exitMessage.String())
-		assert.True(t, exitMessage.Closed())
+		assert.Assert(t, exitStatus != nil)
+		assert.Check(t, *exitStatus == 0)
+		assert.Check(t, exitMessage.String() == "")
+		assert.Check(t, exitMessage.Closed())
 	})
 
 	t.Run("error", func(t *testing.T) {
@@ -61,10 +60,10 @@ func Test_Exit(t *testing.T) {
 				}),
 			)
 
-			require.NotNil(t, exitStatus)
-			assert.Equal(t, 255, *exitStatus)
-			assert.Equal(t, "boom\n", exitMessage.String())
-			assert.True(t, exitMessage.Closed())
+			assert.Assert(t, exitStatus != nil)
+			assert.Check(t, *exitStatus == 255)
+			assert.Check(t, exitMessage.String() == "boom\n")
+			assert.Check(t, exitMessage.Closed())
 		})
 
 		t.Run("with custom status", func(t *testing.T) {
@@ -82,10 +81,10 @@ func Test_Exit(t *testing.T) {
 				}),
 			)
 
-			require.NotNil(t, exitStatus)
-			assert.Equal(t, 42, *exitStatus)
-			assert.Equal(t, "boom\n", exitMessage.String())
-			assert.True(t, exitMessage.Closed())
+			assert.Assert(t, exitStatus != nil)
+			assert.Check(t, *exitStatus == 42)
+			assert.Check(t, exitMessage.String() == "boom\n")
+			assert.Check(t, exitMessage.Closed())
 		})
 	})
 }
@@ -94,21 +93,21 @@ func Test_ExitOption(t *testing.T) {
 	o := new(exitOptions)
 
 	WithExitFunc(os.Exit)(o)
-	assert.NotNil(t, o.exitFunc)
+	assert.Assert(t, o.exitFunc != nil)
 
 	WithExitLoggerFunc(getExitLoggerFromMetadata)(o)
-	assert.NotNil(t, o.getLoggerFunc)
+	assert.Assert(t, o.getLoggerFunc != nil)
 }
 
 func Test_loggerInMetadata(t *testing.T) {
 	t.Run("get a logger even if none is previously set", func(t *testing.T) {
-		assert.NotNil(t, getExitLoggerFromMetadata(context.Background()))
+		assert.Assert(t, getExitLoggerFromMetadata(context.Background()) != nil)
 	})
 
 	t.Run("set a logger", func(t *testing.T) {
 		ctx := NewContextWithMetadata(context.Background())
 		logger := new(bufferThatCloses)
 		SetExitLoggerInMetadata(ctx, logger)
-		assert.Equal(t, logger, getExitLoggerFromMetadata(ctx))
+		assert.Check(t, getExitLoggerFromMetadata(ctx) == logger)
 	})
 }

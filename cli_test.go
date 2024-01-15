@@ -4,7 +4,7 @@ import (
 	"context"
 	"testing"
 
-	"github.com/stretchr/testify/assert"
+	"gotest.tools/v3/assert"
 )
 
 func Test_CLI(t *testing.T) {
@@ -21,7 +21,7 @@ func Test_CLI(t *testing.T) {
 		Add(NewCommand("cmd3", cmd3).AddCommand("cmd31", cmd31)).
 		Mount("cmd4", NewCommand("notcmd4", cmd4))
 
-	assert.Equal(t, &CLI{
+	assert.DeepEqual(t, cli, &CLI{
 		Name:    "cmd0",
 		Command: cmd0,
 		SubCommands: []*CLI{
@@ -52,7 +52,7 @@ func Test_CLI(t *testing.T) {
 				SubCommands: nil,
 			},
 		},
-	}, cli)
+	})
 }
 
 type command0 struct{}

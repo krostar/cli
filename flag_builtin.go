@@ -15,7 +15,7 @@ import (
 func NewBuiltinFlag[T builtins](longName, shortName string, destination *T, description string) Flag {
 	return NewFlag(
 		longName, shortName,
-		NewFlagValuer(destination, builtinFromString[T], func(t T) string { return builtinToString(t) }),
+		NewFlagValuer(destination, builtinFromString[T], builtinToString[T]),
 		description,
 	)
 }

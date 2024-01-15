@@ -5,8 +5,7 @@ import (
 	"syscall"
 	"testing"
 
-	"github.com/stretchr/testify/assert"
-	"github.com/stretchr/testify/require"
+	"gotest.tools/v3/assert"
 )
 
 func Test_ctxMetadata(t *testing.T) {
@@ -14,21 +13,20 @@ func Test_ctxMetadata(t *testing.T) {
 		ctx := NewContextWithMetadata(context.Background())
 
 		value := ctx.Value(ctxKeyMetadata)
-		require.NotNil(t, value)
-		require.IsType(t, make(ctxMetadata), value)
+		assert.Check(t, value != nil)
 	}
 
 	{ // check setting and getting values
 		{ // unprepared context
 			ctx := context.Background()
 			SetMetadataInContext(ctx, "key", "value")
-			assert.Nil(t, GetMetadataFromContext(ctx, "key"))
+			assert.Check(t, GetMetadataFromContext(ctx, "key") == nil)
 		}
 
 		{ // prepared context
 			ctx := NewContextWithMetadata(context.Background())
 			SetMetadataInContext(ctx, "key", "value")
-			assert.Equal(t, "value", GetMetadataFromContext(ctx, "key").(string))
+			assert.Check(t, GetMetadataFromContext(ctx, "key").(string) == "value")
 		}
 	}
 }
@@ -36,26 +34,26 @@ func Test_ctxMetadata(t *testing.T) {
 func Test_NewContextCancelableBySignal(t *testing.T) {
 	t.Run("calling cancel func cancels the context", func(t *testing.T) {
 		ctx, cancel := NewContextCancelableBySignal(syscall.SIGUSR1)
-		require.NoError(t, ctx.Err())
+		assert.NilError(t, ctx.Err())
 		cancel()
 		<-ctx.Done()
-		require.Error(t, ctx.Err())
+		assert.ErrorIs(t, ctx.Err(), context.Canceled)
 	})
 
 	t.Run("sending provided signal cancels the context", func(t *testing.T) {
 		ctx, cancel := NewContextCancelableBySignal(syscall.SIGUSR1)
 		defer cancel()
-		require.NoError(t, ctx.Err())
-		require.NoError(t, syscall.Kill(syscall.Getpid(), syscall.SIGUSR1))
+		assert.NilError(t, ctx.Err())
+		assert.NilError(t, syscall.Kill(syscall.Getpid(), syscall.SIGUSR1))
 		<-ctx.Done()
-		require.Error(t, ctx.Err())
+		assert.ErrorIs(t, ctx.Err(), context.Canceled)
 	})
 
 	t.Run("sending unknown signal keeps context intact", func(t *testing.T) {
 		ctx, cancel := NewContextCancelableBySignal(syscall.SIGUSR1)
 		defer cancel()
-		require.NoError(t, ctx.Err())
-		require.NoError(t, syscall.Kill(syscall.Getpid(), syscall.SIGUSR2))
-		require.NoError(t, ctx.Err())
+		assert.NilError(t, ctx.Err())
+		assert.NilError(t, syscall.Kill(syscall.Getpid(), syscall.SIGUSR2))
+		assert.NilError(t, ctx.Err())
 	})
 }

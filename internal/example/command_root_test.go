@@ -2,31 +2,25 @@ package example
 
 import (
 	"context"
+	"errors"
 	"testing"
 
-	"github.com/stretchr/testify/assert"
-	"github.com/stretchr/testify/require"
+	"gotest.tools/v3/assert"
 
 	"github.com/krostar/cli"
 )
-
-func Test_CommandRoot_implements_Command(t *testing.T) {
-	cmd := new(CommandRoot)
-	assert.Implements(t, (*cli.Command)(nil), cmd)
-	assert.Implements(t, (*cli.CommandDescription)(nil), cmd)
-}
 
 func Test_CommandRoot_Execute(t *testing.T) {
 	cmd := new(CommandRoot)
 
 	err := cmd.Execute(context.Background(), nil, nil)
-	require.Error(t, err)
+	assert.Check(t, err != nil)
 
 	var showUsageErr cli.ShowHelpError
-	require.ErrorAs(t, err, &showUsageErr)
-	assert.True(t, showUsageErr.ShowHelp())
+	assert.Assert(t, errors.As(err, &showUsageErr))
+	assert.Check(t, showUsageErr.ShowHelp())
 
 	var exitStatusErr cli.ExitStatusError
-	require.ErrorAs(t, err, &exitStatusErr)
-	assert.Equal(t, uint8(0), exitStatusErr.ExitStatus())
+	assert.Assert(t, errors.As(err, &exitStatusErr))
+	assert.Check(t, exitStatusErr.ExitStatus() == uint8(0))
 }

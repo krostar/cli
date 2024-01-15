@@ -1,14 +1,13 @@
 ---
 
 issues:
-  exclude-rules:
-    - path: "_test\\.go"
-      linters:
-        - "errorlint"
-        - "dupl"
   exclude-use-default: false
   max-issues-per-linter: 0
   max-same-issues: 0
+  exclude-rules:
+    - path: "_test\\.go"
+      linters:
+        - "nonamedreturns"
 
 linters-settings:
   depguard:
@@ -22,8 +21,10 @@ linters-settings:
       test:
         files: ["$test"]
         deny:
-          - pkg: "gotest.tools/v3/assert"
-            desc: "testing should be done using github.com/stretchr/testify/*"
+          - pkg: "github.com/stretchr/testify/assert"
+            desc: "testing should be done using gotest.tools/v3/assert"
+          - pkg: "github.com/stretchr/testify/require"
+            desc: "testing should be done using gotest.tools/v3/assert"
   errcheck:
     check-blank: true
     exclude-functions:

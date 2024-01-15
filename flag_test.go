@@ -3,7 +3,8 @@ package cli
 import (
 	"testing"
 
-	"github.com/stretchr/testify/assert"
+	"gotest.tools/v3/assert"
+	"gotest.tools/v3/assert/cmp"
 )
 
 func Test_NewFlag(t *testing.T) {
@@ -11,53 +12,71 @@ func Test_NewFlag(t *testing.T) {
 	nonNilValuer := &flagValuer[int]{value: &dest}
 
 	t.Run("ok", func(t *testing.T) {
-		assert.NotNil(t, NewFlag("long", "", nonNilValuer, "foo"))
-		assert.NotNil(t, NewFlag("", "s", nonNilValuer, "foo"))
-		assert.NotNil(t, NewFlag("long", "s", nonNilValuer, "foo"))
-		assert.NotNil(t, NewFlag("long", "s", nonNilValuer, ""))
+		assert.Check(t, NewFlag("long", "", nonNilValuer, "foo") != nil)
+		assert.Check(t, NewFlag("", "s", nonNilValuer, "foo") != nil)
+		assert.Check(t, NewFlag("long", "s", nonNilValuer, "foo") != nil)
+		assert.Check(t, NewFlag("long", "s", nonNilValuer, "") != nil)
 	})
 
 	t.Run("wrong setup", func(t *testing.T) {
 		t.Run("short and long names are unset", func(t *testing.T) {
-			assert.PanicsWithValue(t, "longName and/or shortName must be non-empty", func() {
+			assert.Check(t, func() (result cmp.Result) {
+				defer func() {
+					if reason := recover(); reason != nil {
+						result = cmp.Equal(reason, "longName and/or shortName must be non-empty")()
+					}
+				}()
 				NewFlag("", "", nonNilValuer, "")
+				return cmp.ResultFailure("did not panic")
 			})
 		})
 
 		t.Run("short is set with more than one character", func(t *testing.T) {
-			assert.PanicsWithValue(t, "shortName must be one character long", func() {
+			assert.Check(t, func() (result cmp.Result) {
+				defer func() {
+					if reason := recover(); reason != nil {
+						result = cmp.Equal(reason, "shortName must be one character long")()
+					}
+				}()
 				NewFlag("long", "notSoShort", nonNilValuer, "")
+				return cmp.ResultFailure("did not panic")
 			})
 		})
 
 		t.Run("nil valuer", func(t *testing.T) {
-			assert.PanicsWithValue(t, "a non-nil valuer is required", func() {
+			assert.Check(t, func() (result cmp.Result) {
+				defer func() {
+					if reason := recover(); reason != nil {
+						result = cmp.Equal(reason, "a non-nil valuer is required")()
+					}
+				}()
 				NewFlag("long", "", nil, "")
+				return cmp.ResultFailure("did not panic")
 			})
 		})
 	})
 }
 
 func Test_flagValue_LongName(t *testing.T) {
-	assert.Equal(t, "long", flagValue{
+	assert.Check(t, flagValue{
 		longName:    "long",
 		shortName:   "short",
 		description: "description",
-	}.LongName())
+	}.LongName() == "long")
 }
 
 func Test_flagValue_ShortName(t *testing.T) {
-	assert.Equal(t, "short", flagValue{
+	assert.Check(t, flagValue{
 		longName:    "long",
 		shortName:   "short",
 		description: "description",
-	}.ShortName())
+	}.ShortName() == "short")
 }
 
 func Test_flagValue_Description(t *testing.T) {
-	assert.Equal(t, "description", flagValue{
+	assert.Check(t, flagValue{
 		longName:    "long",
 		shortName:   "short",
 		description: "description",
-	}.Description())
+	}.Description() == "description")
 }
