@@ -14,6 +14,7 @@ func Test_NewFlagValuer(t *testing.T) {
 
 		valuer := NewFlagValuer(&d, time.ParseDuration, func(d time.Duration) string { return d.String() })
 
+		assert.Check(t, valuer.Destination() == &d)
 		assert.Check(t, valuer.TypeRepr() == "time.Duration")
 		assert.Check(t, !valuer.IsSet())
 		assert.ErrorContains(t, valuer.FromString("abc"), "invalid duration")

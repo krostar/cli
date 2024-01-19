@@ -7,6 +7,8 @@ import (
 
 // FlagValuer defines how to set and get the value of a flag.
 type FlagValuer interface {
+	// Destination returns flag's value pointer.
+	Destination() any
 	// FromString parses and set the value.
 	FromString(str string) error
 	// IsSet returns whether the flag value has been set.
@@ -50,6 +52,8 @@ type flagValuer[T any] struct {
 	parse    func(string) (T, error)
 	toString func(T) string
 }
+
+func (v *flagValuer[T]) Destination() any { return v.value }
 
 func (v *flagValuer[T]) FromString(raw string) error {
 	value, err := v.parse(strings.TrimSpace(raw))
