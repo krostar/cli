@@ -14,6 +14,7 @@ import (
 )
 
 func buildCobraCommandFromCLIRecursively(ctx context.Context, c *cli.CLI) (*cobra.Command, error) {
+	ctx = cli.NewCommandContext(ctx)
 	ctx = mapper.Context(c.Command, ctx)
 
 	command, err := buildCobraCommandFromCLICommand(ctx, c.Name, c.Command)
@@ -59,8 +60,11 @@ func buildCobraCommandFromCLICommand(ctx context.Context, commandName string, cl
 		return nil, err
 	}
 
-	setCobraFlagsFromCLIFlags(cobraCommand.Flags(), mapper.Flags(cliCommand))
-	setCobraFlagsFromCLIFlags(cobraCommand.PersistentFlags(), mapper.PersistentFlags(cliCommand))
+	localFlags, persistentFlags := mapper.Flags(cliCommand), mapper.PersistentFlags(cliCommand)
+	cli.SetInitializedFlagsInContext(ctx, localFlags, persistentFlags)
+
+	setCobraFlagsFromCLIFlags(cobraCommand.Flags(), localFlags)
+	setCobraFlagsFromCLIFlags(cobraCommand.PersistentFlags(), persistentFlags)
 
 	return cobraCommand, nil
 }

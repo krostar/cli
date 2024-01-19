@@ -7,14 +7,47 @@ import (
 )
 
 type (
-	ctxKey      uint8
+	ctxKey     uint8
+	ctxCommand struct {
+		localFlags      []Flag
+		persistentFlags []Flag
+	}
 	ctxMetadata map[any]any
 )
 
 const (
-	ctxKeyMetadata ctxKey = iota
-	ctxKeyExitLogger
+	ctxKeyCommand ctxKey = iota
+	ctxKeyMetadata
+	metadataKeyExitLogger
 )
+
+// NewCommandContext is called for each command to create a dedicated context.
+func NewCommandContext(ctx context.Context) context.Context {
+	return context.WithValue(ctx, ctxKeyCommand, new(ctxCommand))
+}
+
+func getCommandFromContext(ctx context.Context) *ctxCommand {
+	if cmd, ok := ctx.Value(ctxKeyCommand).(*ctxCommand); ok {
+		return cmd
+	}
+	return nil
+}
+
+// SetInitializedFlagsInContext sets the provided initialized flags in the command context.
+func SetInitializedFlagsInContext(ctx context.Context, localFlags, persistentFlags []Flag) {
+	if cmd := getCommandFromContext(ctx); cmd != nil {
+		cmd.localFlags = localFlags
+		cmd.persistentFlags = persistentFlags
+	}
+}
+
+// GetInitializedFlagsFromContext returns initialized command flags.
+func GetInitializedFlagsFromContext(ctx context.Context) ([]Flag, []Flag) {
+	if cmd, ok := ctx.Value(ctxKeyCommand).(*ctxCommand); ok {
+		return cmd.localFlags, cmd.persistentFlags
+	}
+	return nil, nil
+}
 
 // NewContextWithMetadata wraps the provided context to create a global metadata store to the CLI.
 // It helps to pass dependencies across commands tree.

@@ -8,6 +8,33 @@ import (
 	"gotest.tools/v3/assert"
 )
 
+func Test_ctxCommand(t *testing.T) {
+	{ // check context setup
+		ctx := NewCommandContext(context.Background())
+
+		value := ctx.Value(ctxKeyCommand)
+		assert.Check(t, value != nil)
+	}
+
+	{ // check setting and getting values
+		{ // unprepared context
+			ctx := context.Background()
+			SetInitializedFlagsInContext(ctx, []Flag{nil, nil}, []Flag{nil, nil})
+			local, persistent := GetInitializedFlagsFromContext(ctx)
+			assert.Check(t, local == nil)
+			assert.Check(t, persistent == nil)
+		}
+
+		{ // prepared context
+			ctx := NewCommandContext(context.Background())
+			SetInitializedFlagsInContext(ctx, []Flag{nil, nil}, []Flag{nil})
+			local, persistent := GetInitializedFlagsFromContext(ctx)
+			assert.Check(t, len(local) == 2)
+			assert.Check(t, len(persistent) == 1)
+		}
+	}
+}
+
 func Test_ctxMetadata(t *testing.T) {
 	{ // check context setup
 		ctx := NewContextWithMetadata(context.Background())

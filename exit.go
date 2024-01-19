@@ -75,11 +75,11 @@ func WithExitLoggerFunc(getLoggerFunc func(context.Context) io.WriteCloser) Exit
 // SetExitLoggerInMetadata sets the logger used by the CLI to write the exit message if any, inside the metadata.
 // By default, the Exit func tries to find the logger in the metadata.
 func SetExitLoggerInMetadata(ctx context.Context, writer io.WriteCloser) {
-	SetMetadataInContext(ctx, ctxKeyExitLogger, writer)
+	SetMetadataInContext(ctx, metadataKeyExitLogger, writer)
 }
 
 func getExitLoggerFromMetadata(ctx context.Context) io.WriteCloser {
-	rawWriter := GetMetadataFromContext(ctx, ctxKeyExitLogger)
+	rawWriter := GetMetadataFromContext(ctx, metadataKeyExitLogger)
 	if writer, ok := rawWriter.(io.WriteCloser); ok {
 		return writer
 	}
