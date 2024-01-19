@@ -8,14 +8,17 @@ issues:
     - path: "_test\\.go"
       linters:
         - "nonamedreturns"
+        - "errcheck"
+    - path: "_test\\.go"
+      linters:
+        - "revive"
+      text: "nested-structs"
 
 linters-settings:
   depguard:
     rules:
       all:
         deny:
-          - pkg: "reflect"
-            desc: "by default reflect import is prohibited due to the high level of complexity it brings into the code"
           - pkg: "github.com/pkg/errors"
             desc: "use go1.13 errors"
       test:
@@ -72,6 +75,8 @@ linters-settings:
         alias: "gocmpopts"
       - pkg: "github.com/krostar/cli/mapper/internal"
         alias: "mapper"
+      - pkg: "github.com/krostar/cli/cfg"
+        alias: "clicfg"
     no-extra-aliases: true
   misspell:
     locale: "US"
@@ -136,6 +141,7 @@ linters:
     - "deadcode"
     - "decorder"
     - "dogsled"
+    - "exhaustive"
     - "exhaustivestruct"
     - "exhaustruct"
     - "forbidigo"

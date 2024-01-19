@@ -9,6 +9,7 @@ pkgs.mkShellNoCC {
     go_1_21
     gofumpt
     golangci-lint
+    gotools
     govulncheck
     shellcheck
     statix
