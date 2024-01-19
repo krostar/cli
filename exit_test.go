@@ -20,6 +20,7 @@ func (l *bufferThatCloses) Close() error {
 	l.closed = true
 	return nil
 }
+
 func (l *bufferThatCloses) Closed() bool { return l.closed }
 
 func Test_Exit(t *testing.T) {

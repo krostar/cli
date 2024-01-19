@@ -18,8 +18,25 @@ func Test_NewBuiltinFlag(t *testing.T) {
 	assert.ErrorContains(t, flag.FromString("abc"), "invalid syntax")
 
 	assert.NilError(t, flag.FromString("  42 "))
-	repr := flag.String()
-	assert.Check(t, repr == "42")
+	assert.Check(t, value == 42)
+	assert.Check(t, flag.String() == "42")
+}
+
+func Test_NewBuiltinPointerFlag(t *testing.T) {
+	var value *int
+
+	flag := NewBuiltinPointerFlag[int]("longName", "s", &value, "description")
+	assert.Check(t, flag.LongName() == "longName")
+	assert.Check(t, flag.ShortName() == "s")
+	assert.Check(t, flag.Description() == "description")
+	assert.Check(t, flag.TypeRepr() == "*int")
+
+	assert.ErrorContains(t, flag.FromString("abc"), "invalid syntax")
+	assert.Check(t, flag.String() == "<nil>")
+
+	assert.NilError(t, flag.FromString("  42 "))
+	assert.Check(t, value != nil && *value == 42)
+	assert.Check(t, flag.String() == "42")
 }
 
 func Test_NewBuiltinSliceFlag(t *testing.T) {

@@ -20,6 +20,33 @@ func NewBuiltinFlag[T builtins](longName, shortName string, destination *T, desc
 	)
 }
 
+// NewBuiltinPointerFlag creates a new Flag which underlying type is any pointer on builtin type declared below.
+//
+//	longName is the long flagValue name, like --longname ; cannot be empty.
+//	shortName is the short flagValue name ; usually 1 character, like -s ; can be empty.
+//	destination is a pointer on the variable on which flagValue's value will be stored ; cannot be nil.
+//	description is a short text explaining the flagValue ; can be empty.
+func NewBuiltinPointerFlag[T builtins](longName, shortName string, destination **T, description string) Flag {
+	return NewFlag(
+		longName, shortName,
+		NewFlagValuer(destination,
+			func(s string) (*T, error) {
+				b, err := builtinFromString[T](s)
+				if err != nil {
+					return nil, err
+				}
+				return &b, nil
+			},
+			func(t *T) string {
+				if t != nil {
+					return builtinToString[T](*t)
+				}
+				return "<nil>"
+			},
+		), description,
+	)
+}
+
 // NewBuiltinSliceFlag creates a new Flag which underlying type is any slice of builtin type declared below.
 //
 //	longName is the long flagValue name, like --longname ; cannot be empty.
@@ -52,8 +79,7 @@ func NewBuiltinSliceFlag[T builtins](longName, shortName string, destination *[]
 				}
 				return "[" + strings.Join(valuesRepr, ",") + "]"
 			},
-		),
-		description,
+		), description,
 	)
 }
 
