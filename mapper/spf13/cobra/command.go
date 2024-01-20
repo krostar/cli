@@ -114,31 +114,21 @@ func setCobraHooksFromCLIHooks(ctx context.Context, c *cobra.Command, hook *cli.
 	}
 
 	c.PersistentPostRunE = func(c *cobra.Command, args []string) error {
+		if err := persistentHook.AfterCommandExecution(ctx); err != nil {
+			return err
+		}
+
 		if parent := c.Parent(); parent != nil && parent.PersistentPostRunE != nil {
 			if err := parent.PersistentPostRunE(parent, args); err != nil {
 				return err
 			}
 		}
-		return persistentHook.AfterCommandExecution(ctx)
+
+		return nil
 	}
 
-	c.PreRunE = func(c *cobra.Command, args []string) error {
-		if parent := c.Parent(); parent != nil && parent.PreRunE != nil {
-			if err := parent.PreRunE(parent, args); err != nil {
-				return err
-			}
-		}
-		return hook.BeforeCommandExecution(ctx)
-	}
-
-	c.PostRunE = func(c *cobra.Command, args []string) error {
-		if parent := c.Parent(); parent != nil && parent.PostRunE != nil {
-			if err := parent.PostRunE(parent, args); err != nil {
-				return err
-			}
-		}
-		return hook.AfterCommandExecution(ctx)
-	}
+	c.PreRunE = func(c *cobra.Command, args []string) error { return hook.BeforeCommandExecution(ctx) }
+	c.PostRunE = func(c *cobra.Command, args []string) error { return hook.AfterCommandExecution(ctx) }
 
 	return nil
 }
