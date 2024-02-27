@@ -15,7 +15,7 @@ func Test_BeforeCommandExecutionHook(t *testing.T) {
 	var cfg config
 
 	t.Run("ok", func(t *testing.T) {
-		assert.NilError(t, BeforeCommandExecutionHook([]SourceFunc[config]{
+		assert.NilError(t, BeforeCommandExecutionHook(&cfg,
 			func(_ context.Context, cfg *config) error {
 				cfg.A += "1"
 				return nil
@@ -28,7 +28,7 @@ func Test_BeforeCommandExecutionHook(t *testing.T) {
 				cfg.A += "3"
 				return nil
 			},
-		}, &cfg)(context.Background()))
+		)(context.Background()))
 
 		assert.Check(t, cfg.A == "123")
 	})
@@ -36,8 +36,10 @@ func Test_BeforeCommandExecutionHook(t *testing.T) {
 	t.Run("error", func(t *testing.T) {
 		expectedErr := errors.New("boom")
 
-		assert.ErrorIs(t, BeforeCommandExecutionHook([]SourceFunc[config]{
-			func(context.Context, *config) error { return expectedErr },
-		}, &cfg)(context.Background()), expectedErr)
+		assert.ErrorIs(t, BeforeCommandExecutionHook(&cfg,
+			func(context.Context, *config) error {
+				return expectedErr
+			},
+		)(context.Background()), expectedErr)
 	})
 }

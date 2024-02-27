@@ -11,7 +11,9 @@ import (
 type SourceFunc[T any] func(ctx context.Context, cfg *T) error
 
 // BeforeCommandExecutionHook replaces dest with provided config sources.
-func BeforeCommandExecutionHook[T any](sources []SourceFunc[T], dest *T) cli.HookFunc {
+func BeforeCommandExecutionHook[T any](dest *T, source SourceFunc[T], sources ...SourceFunc[T]) cli.HookFunc {
+	sources = append([]SourceFunc[T]{source}, sources...)
+
 	return func(ctx context.Context) error {
 		cfg := new(T)
 
