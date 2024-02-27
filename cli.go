@@ -7,31 +7,22 @@ type CLI struct {
 	SubCommands []*CLI
 }
 
-// NewCommand creates a new CLI builder.
-func NewCommand(name string, command Command) *CLI {
-	return &CLI{
-		Name:    name,
-		Command: command,
-	}
+// New creates a new CLI.
+func New(cmd Command) *CLI {
+	return &CLI{Command: cmd}
 }
 
 // AddCommand adds a new subcommand to the CLI.
 func (cli *CLI) AddCommand(name string, cmd Command) *CLI {
-	cli.SubCommands = append(cli.SubCommands, NewCommand(name, cmd))
-	return cli
-}
-
-// Add adds a whole new CLI as a subcommand of the CLI.
-// Name of the root command of the sub cli is used as mount name.
-func (cli *CLI) Add(sub *CLI) *CLI {
-	cli.SubCommands = append(cli.SubCommands, sub)
+	cli.SubCommands = append(cli.SubCommands, &CLI{Name: name, Command: cmd})
 	return cli
 }
 
 // Mount adds a whole new CLI as a subcommand of the CLI.
-// Provided name command of the cli is used as mount name.
+// Provided name command of the cli is used as sub commands name.
 func (cli *CLI) Mount(name string, sub *CLI) *CLI {
-	ssub := *sub
-	ssub.Name = name
-	return cli.Add(&ssub)
+	mount := *sub
+	mount.Name = name
+	cli.SubCommands = append(cli.SubCommands, &mount)
+	return cli
 }

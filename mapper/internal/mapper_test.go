@@ -174,7 +174,7 @@ func (commandWithAll) Flags() []cli.Flag {
 
 func (commandWithAll) Hook() *cli.Hook {
 	return &cli.Hook{
-		BeforeCommandExecution: func(ctx context.Context) error {
+		BeforeCommandExecution: func(context.Context) error {
 			return errors.New("hook")
 		},
 	}
@@ -187,7 +187,7 @@ func (commandWithAll) PersistentFlags() []cli.Flag {
 
 func (commandWithAll) PersistentHook() *cli.Hook {
 	return &cli.Hook{
-		BeforeCommandExecution: func(ctx context.Context) error {
+		BeforeCommandExecution: func(context.Context) error {
 			return errors.New("persistent hook")
 		},
 	}

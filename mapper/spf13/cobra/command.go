@@ -127,8 +127,8 @@ func setCobraHooksFromCLIHooks(ctx context.Context, c *cobra.Command, hook *cli.
 		return nil
 	}
 
-	c.PreRunE = func(c *cobra.Command, args []string) error { return hook.BeforeCommandExecution(ctx) }
-	c.PostRunE = func(c *cobra.Command, args []string) error { return hook.AfterCommandExecution(ctx) }
+	c.PreRunE = func(*cobra.Command, []string) error { return hook.BeforeCommandExecution(ctx) }
+	c.PostRunE = func(*cobra.Command, []string) error { return hook.AfterCommandExecution(ctx) }
 
 	return nil
 }

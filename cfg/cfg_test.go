@@ -16,15 +16,15 @@ func Test_BeforeCommandExecutionHook(t *testing.T) {
 
 	t.Run("ok", func(t *testing.T) {
 		assert.NilError(t, BeforeCommandExecutionHook([]SourceFunc[config]{
-			func(ctx context.Context, cfg *config) error {
+			func(_ context.Context, cfg *config) error {
 				cfg.A += "1"
 				return nil
 			},
-			func(ctx context.Context, cfg *config) error {
+			func(_ context.Context, cfg *config) error {
 				cfg.A += "2"
 				return nil
 			},
-			func(ctx context.Context, cfg *config) error {
+			func(_ context.Context, cfg *config) error {
 				cfg.A += "3"
 				return nil
 			},

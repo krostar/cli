@@ -16,7 +16,7 @@ import (
 // Source updates config with environment variable value.
 // A structure that can be set using A.B.C = 42 can be set
 // through the environment variable named A_B_C = "42".
-// Additional env values can be used with the `env` tag.
+// Additional env values can be used with the `env` go tag.
 func Source[T any](envPrefix string) clicfg.SourceFunc[T] {
 	return func(_ context.Context, cfg *T) error {
 		_, err := recursivelyWalkThroughReflectValue(os.LookupEnv, reflect.ValueOf(cfg).Elem(), envPrefix, nil)

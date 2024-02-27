@@ -14,7 +14,7 @@ func main() {
 	defer cancel()
 
 	cli.Exit(ctx, spf13cobra.Execute(ctx, os.Args, cli.
-		NewCommand("my-app", new(example.CommandRoot)).
+		New(new(example.CommandRoot)).
 		AddCommand("print", &example.CommandPrint{Writer: os.Stdout}),
 	))
 }

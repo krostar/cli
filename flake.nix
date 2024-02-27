@@ -11,7 +11,27 @@
       overlays ? [],
     }: (import nixpkgs {inherit system overlays;});
   in {
-    devShells = forEachSupportedSystems (system: {default = import ./shell.nix {pkgs = pkgsForSystem system {};};});
+    devShells = forEachSupportedSystems (system: let
+      pkgs = pkgsForSystem system {};
+    in {
+      default = pkgs.mkShellNoCC {
+        nativeBuildInputs = with pkgs; [
+          act
+          alejandra
+          deadnix
+          gci
+          git
+          go_1_21
+          gofumpt
+          golangci-lint
+          gotools
+          govulncheck
+          shellcheck
+          statix
+          yamllint
+        ];
+      };
+    });
     formatter = forEachSupportedSystems (system: let pkgs = pkgsForSystem system {}; in pkgs.alejandra);
   };
 }

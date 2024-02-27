@@ -44,7 +44,7 @@ func AddProvider(ctx context.Context, f any, opts ...dig.ProvideOption) {
 	}
 }
 
-// Invoke uses previously provided functions (through AddProvider) to func any parameters of the provided function f.
+// Invoke uses previously provided functions (through AddProvider) to initialize function f.
 func Invoke(ctx context.Context, f any, opts ...dig.InvokeOption) error {
 	container, exists := cli.GetMetadataFromContext(ctx, contextKeyDIContainer).(*dig.Container)
 	if !exists {

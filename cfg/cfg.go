@@ -10,7 +10,7 @@ import (
 // SourceFunc defines the function signature to apply a config source to the provided config.
 type SourceFunc[T any] func(ctx context.Context, cfg *T) error
 
-// BeforeCommandExecutionHook replace dest with provided config sources.
+// BeforeCommandExecutionHook replaces dest with provided config sources.
 func BeforeCommandExecutionHook[T any](sources []SourceFunc[T], dest *T) cli.HookFunc {
 	return func(ctx context.Context) error {
 		cfg := new(T)

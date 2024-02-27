@@ -11,7 +11,7 @@ The main goal of this package is to avoid being too tightly coupled with existin
 ## Motivation
 
 As of today, there are some very nice frameworks to use to handle command line interface; one of them is [spf13/cobra](https://github.com/spf13/cobra); 
-but it is not super obvious how to create something not too tightly coupled to cobra.
+but it is not super obvious how to create something decoupled from cobra.
 
 Why would someone want to do that ?
 - i was using [spf13/cobra](https://github.com/spf13/cobra) and wanted to try [urfave/cli](https://github.com/urfave/cli)
@@ -32,12 +32,12 @@ func (myCommand) Execute(ctx context.Context, args []string, dashedArgs []string
 }
 
 func main() {
-	cmd := cli.NewCommand("my-app", myCommand{})
+	cmd := cli.NewCommand(myCommand{})
 	err := spf13cobra.Execute(context.Background(), os.Args, cmd)
 	cli.Exit(err)
 }
 ```
 
-This will create a CLI named **my-app** with one root command. This CLI is then mapped to be executed by the spf13/cobra framework.
+This will create a CLI with one root command. This CLI is then mapped to be executed by the spf13/cobra framework.
 
 A more useful / complex example can be found in `internal/example`.

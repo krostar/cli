@@ -25,7 +25,7 @@ type configWithFlag struct {
 }
 
 func Test_Source(t *testing.T) {
-	t.Run("", func(t *testing.T) {
+	t.Run("ok", func(t *testing.T) {
 		var cfgForFlags configWithFlag
 		src := Source[configWithFlag](&cfgForFlags)
 

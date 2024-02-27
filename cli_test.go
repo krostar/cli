@@ -15,14 +15,13 @@ func Test_CLI(t *testing.T) {
 	cmd31 := new(command31)
 	cmd4 := new(command4)
 
-	cli := NewCommand("cmd0", cmd0).
+	cli := New(cmd0).
 		AddCommand("cmd1", cmd1).
 		AddCommand("cmd2", cmd2).
-		Add(NewCommand("cmd3", cmd3).AddCommand("cmd31", cmd31)).
-		Mount("cmd4", NewCommand("notcmd4", cmd4))
+		Mount("cmd3", New(cmd3).AddCommand("cmd31", cmd31)).
+		Mount("cmd4", New(cmd4))
 
 	assert.DeepEqual(t, cli, &CLI{
-		Name:    "cmd0",
 		Command: cmd0,
 		SubCommands: []*CLI{
 			{

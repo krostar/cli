@@ -60,8 +60,8 @@ awesome: avalue
 
 		t.Run("allow non existing", func(t *testing.T) {
 			src := Source[configWithFile](
-				func(cfg configWithFile) string { return configFile.Name() },
-				func(r io.Reader, cfg *configWithFile) error { return errors.New("boom") },
+				func(configWithFile) string { return configFile.Name() },
+				func(io.Reader, *configWithFile) error { return errors.New("boom") },
 				true,
 			)
 			assert.NilError(t, src(context.Background(), new(configWithFile)), os.ErrNotExist)
@@ -69,8 +69,8 @@ awesome: avalue
 
 		t.Run("do not allow non existing", func(t *testing.T) {
 			src := Source[configWithFile](
-				func(cfg configWithFile) string { return configFile.Name() },
-				func(r io.Reader, cfg *configWithFile) error { return errors.New("boom") },
+				func(configWithFile) string { return configFile.Name() },
+				func(io.Reader, *configWithFile) error { return errors.New("boom") },
 				false,
 			)
 			assert.Check(t, errors.Is(src(context.Background(), new(configWithFile)), os.ErrNotExist))
@@ -85,8 +85,8 @@ awesome: avalue
 		expectedErr := errors.New("boom")
 
 		src := Source[configWithFile](
-			func(cfg configWithFile) string { return configFile.Name() },
-			func(r io.Reader, cfg *configWithFile) error { return expectedErr },
+			func(configWithFile) string { return configFile.Name() },
+			func(io.Reader, *configWithFile) error { return expectedErr },
 			false,
 		)
 

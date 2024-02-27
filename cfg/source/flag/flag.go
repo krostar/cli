@@ -28,9 +28,7 @@ func Source[T any](flagDest *T) clicfg.SourceFunc[T] {
 			}
 		}
 
-		v1 := reflect.ValueOf(flagDest).Elem()
-
-		if err := recursivelyWalkThroughReflectValue(pointersToValuesSetByFlags, v1, reflect.ValueOf(cfg).Elem()); err != nil {
+		if err := recursivelyWalkThroughReflectValue(pointersToValuesSetByFlags, reflect.ValueOf(flagDest).Elem(), reflect.ValueOf(cfg).Elem()); err != nil {
 			return fmt.Errorf("unable to walk through config: %v", err)
 		}
 
