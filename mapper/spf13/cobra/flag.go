@@ -8,7 +8,10 @@ import (
 
 func setCobraFlagsFromCLIFlags(set *pflag.FlagSet, flags []cli.Flag) {
 	for _, flag := range flags {
-		set.VarP(&flagValuer{flag}, flag.LongName(), flag.ShortName(), flag.Description())
+		fset := set.VarPF(&flagValuer{flag}, flag.LongName(), flag.ShortName(), flag.Description())
+		if _, isBool := flag.Destination().(*bool); isBool {
+			fset.NoOptDefVal = "true"
+		}
 	}
 }
 
