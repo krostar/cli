@@ -45,7 +45,7 @@ func recursivelyWalkThroughReflectValue(pointers map[uintptr]struct{}, v1, v2 re
 		return nil
 	}
 
-	switch k := v1.Type().Kind(); k {
+	switch k := v1.Type().Kind(); k { //nolint:exhaustive // all other cases handled in default
 	case reflect.Pointer:
 		if v1.IsNil() {
 			return nil
@@ -62,7 +62,7 @@ func recursivelyWalkThroughReflectValue(pointers map[uintptr]struct{}, v1, v2 re
 
 	case reflect.Struct:
 		var errs []error
-		for i := 0; i < v1.NumField(); i++ {
+		for i := range v1.NumField() {
 			errs = append(errs, recursivelyWalkThroughReflectValue(pointers, v1.Field(i), v2.Field(i)))
 		}
 		return multierr.Combine(errs...)

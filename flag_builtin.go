@@ -87,6 +87,7 @@ type builtins interface {
 	bool | string | int | int8 | int16 | int32 | int64 | uint | uint8 | uint16 | uint32 | uint64 | float32 | float64 | complex64 | complex128
 }
 
+//nolint:revive // unchecked-type-assertion: linter does not like the (T) cast that is unchecked, but nothing to worry about here
 func builtinFromString[T builtins](raw string) (T, error) {
 	newT := *new(T)
 
@@ -144,7 +145,7 @@ func builtinFromString[T builtins](raw string) (T, error) {
 	}
 }
 
-//nolint:gomnd // don't lint for hardcoded number for precision
+//nolint:mnd // don't lint for hardcoded number for precision
 func builtinToString[T builtins](t T) string {
 	switch t := any(t).(type) {
 	case bool:

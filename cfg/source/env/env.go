@@ -27,7 +27,7 @@ func Source[T any](envPrefix string) clicfg.SourceFunc[T] {
 func recursivelyWalkThroughReflectValue(lookupEnv func(string) (string, bool), v reflect.Value, envPrefix string, additionalEnvsToLookup []string) (bool, error) {
 	t := v.Type()
 
-	switch t.Kind() {
+	switch t.Kind() { //nolint:exhaustive // all other cases handled in default
 	case reflect.Pointer:
 		if !v.IsNil() {
 			return recursivelyWalkThroughReflectValue(lookupEnv, v.Elem(), envPrefix, additionalEnvsToLookup)
@@ -45,7 +45,7 @@ func recursivelyWalkThroughReflectValue(lookupEnv func(string) (string, bool), v
 			errs            []error
 			atLeastOneFound bool
 		)
-		for i := 0; i < v.NumField(); i++ {
+		for i := range v.NumField() {
 			tfield := t.Field(i)
 			tag := tfield.Tag.Get("env")
 
@@ -76,7 +76,7 @@ func recursivelyWalkThroughReflectValue(lookupEnv func(string) (string, bool), v
 			return false, nil
 		}
 
-		switch k := t.Kind(); k {
+		switch k := t.Kind(); k { //nolint:exhaustive // all other cases handled in default
 		case reflect.Bool:
 			vv, err := strconv.ParseBool(rawEnv)
 			v.SetBool(vv)

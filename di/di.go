@@ -39,7 +39,7 @@ func AddProvider(ctx context.Context, f any, opts ...dig.ProvideOption) {
 	}
 
 	if err := container.Provide(f, opts...); err != nil {
-		errs, _ := cli.GetMetadataFromContext(ctx, contextKeyDIProvideErrors).([]error)
+		errs, _ := cli.GetMetadataFromContext(ctx, contextKeyDIProvideErrors).([]error) //nolint:revive // unchecked-type-assertion: we know this type for sure
 		cli.SetMetadataInContext(ctx, contextKeyDIProvideErrors, append(errs, err))
 	}
 }
@@ -51,7 +51,7 @@ func Invoke(ctx context.Context, f any, opts ...dig.InvokeOption) error {
 		return errors.New("container is unset in the context")
 	}
 
-	if errs, _ := cli.GetMetadataFromContext(ctx, contextKeyDIProvideErrors).([]error); len(errs) > 0 {
+	if errs, _ := cli.GetMetadataFromContext(ctx, contextKeyDIProvideErrors).([]error); len(errs) > 0 { //nolint:revive // unchecked-type-assertion: we know this type for sure
 		return fmt.Errorf("provider error: %v", multierr.Combine(errs...))
 	}
 
