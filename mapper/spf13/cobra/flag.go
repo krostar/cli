@@ -6,6 +6,7 @@ import (
 	"github.com/krostar/cli"
 )
 
+// setCobraFlagsFromCLIFlags adds flags to a `pflag.FlagSet` based on the provided `cli.Flag` slice.
 func setCobraFlagsFromCLIFlags(set *pflag.FlagSet, flags []cli.Flag) {
 	for _, flag := range flags {
 		fset := set.VarPF(&flagValuer{flag}, flag.LongName(), flag.ShortName(), flag.Description())
@@ -17,12 +18,6 @@ func setCobraFlagsFromCLIFlags(set *pflag.FlagSet, flags []cli.Flag) {
 
 type flagValuer struct{ cli.FlagValuer }
 
-func (flag *flagValuer) Set(raw string) error {
-	return flag.FlagValuer.FromString(raw)
-}
-
-func (flag *flagValuer) Type() string {
-	return flag.FlagValuer.TypeRepr()
-}
-
-func (flag *flagValuer) String() string { return flag.FlagValuer.String() }
+func (flag *flagValuer) Set(raw string) error { return flag.FromString(raw) }
+func (flag *flagValuer) Type() string         { return flag.TypeRepr() }
+func (flag *flagValuer) String() string       { return flag.FlagValuer.String() }

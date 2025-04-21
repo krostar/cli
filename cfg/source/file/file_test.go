@@ -1,15 +1,14 @@
 package sourcefile
 
 import (
-	"context"
 	"errors"
 	"io"
 	"os"
 	"path/filepath"
 	"testing"
 
+	"github.com/krostar/test"
 	"gopkg.in/yaml.v3"
-	"gotest.tools/v3/assert"
 )
 
 type configWithFile struct {
@@ -21,9 +20,9 @@ type configWithFile struct {
 func Test_Source(t *testing.T) {
 	t.Run("ok", func(t *testing.T) {
 		configFile, err := os.CreateTemp(t.TempDir(), "*.yaml")
-		assert.NilError(t, err)
+		test.Require(t, err == nil)
 		t.Cleanup(func() { _ = os.Remove(configFile.Name()) })
-		_, _ = io.WriteString(configFile, `
+		_, _ = configFile.WriteString(`
 awesome: avalue
 `)
 
@@ -44,8 +43,8 @@ awesome: avalue
 			B:        "bvalue",
 			Filename: configFile.Name(),
 		}
-		assert.NilError(t, src(context.Background(), &cfg))
-		assert.DeepEqual(t, cfg, configWithFile{
+		test.Require(t, src(test.Context(t), &cfg) == nil)
+		test.Assert(t, cfg == configWithFile{
 			A:        "avalue",
 			B:        "bvalue",
 			Filename: configFile.Name(),
@@ -54,9 +53,9 @@ awesome: avalue
 
 	t.Run("file not found", func(t *testing.T) {
 		configFile, err := os.OpenFile(filepath.Join(t.TempDir(), "perm.yaml"), os.O_CREATE|os.O_EXCL, 0o400)
-		assert.NilError(t, err)
-		assert.NilError(t, configFile.Close())
-		assert.NilError(t, os.Remove(configFile.Name()))
+		test.Require(t, err == nil)
+		test.Assert(t, configFile.Close() == nil)
+		test.Assert(t, os.Remove(configFile.Name()) == nil)
 
 		t.Run("allow non existing", func(t *testing.T) {
 			src := Source[configWithFile](
@@ -64,7 +63,7 @@ awesome: avalue
 				func(io.Reader, *configWithFile) error { return errors.New("boom") },
 				true,
 			)
-			assert.NilError(t, src(context.Background(), new(configWithFile)), os.ErrNotExist)
+			test.Assert(t, src(test.Context(t), new(configWithFile)) == nil)
 		})
 
 		t.Run("do not allow non existing", func(t *testing.T) {
@@ -73,13 +72,13 @@ awesome: avalue
 				func(io.Reader, *configWithFile) error { return errors.New("boom") },
 				false,
 			)
-			assert.Check(t, errors.Is(src(context.Background(), new(configWithFile)), os.ErrNotExist))
+			test.Assert(t, errors.Is(src(test.Context(t), new(configWithFile)), os.ErrNotExist))
 		})
 	})
 
 	t.Run("unable to deserialize", func(t *testing.T) {
 		configFile, err := os.CreateTemp(t.TempDir(), "*.yaml")
-		assert.NilError(t, err)
+		test.Require(t, err == nil)
 		t.Cleanup(func() { _ = os.Remove(configFile.Name()) })
 
 		expectedErr := errors.New("boom")
@@ -90,6 +89,6 @@ awesome: avalue
 			false,
 		)
 
-		assert.Check(t, errors.Is(src(context.Background(), new(configWithFile)), expectedErr))
+		test.Assert(t, errors.Is(src(test.Context(t), new(configWithFile)), expectedErr))
 	})
 }

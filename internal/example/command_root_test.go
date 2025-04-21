@@ -1,11 +1,10 @@
 package example
 
 import (
-	"context"
 	"errors"
 	"testing"
 
-	"gotest.tools/v3/assert"
+	"github.com/krostar/test"
 
 	"github.com/krostar/cli"
 )
@@ -13,14 +12,14 @@ import (
 func Test_CommandRoot_Execute(t *testing.T) {
 	cmd := new(CommandRoot)
 
-	err := cmd.Execute(context.Background(), nil, nil)
-	assert.Check(t, err != nil)
+	err := cmd.Execute(test.Context(t), nil, nil)
+	test.Assert(t, err != nil)
 
 	var showUsageErr cli.ShowHelpError
-	assert.Assert(t, errors.As(err, &showUsageErr))
-	assert.Check(t, showUsageErr.ShowHelp())
+	test.Require(t, errors.As(err, &showUsageErr))
+	test.Assert(t, showUsageErr.ShowHelp())
 
 	var exitStatusErr cli.ExitStatusError
-	assert.Assert(t, errors.As(err, &exitStatusErr))
-	assert.Check(t, exitStatusErr.ExitStatus() == uint8(0))
+	test.Require(t, errors.As(err, &exitStatusErr))
+	test.Assert(t, exitStatusErr.ExitStatus() == uint8(0))
 }

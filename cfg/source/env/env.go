@@ -13,10 +13,11 @@ import (
 	clicfg "github.com/krostar/cli/cfg"
 )
 
-// Source updates config with environment variable value.
-// A structure that can be set using A.B.C = 42 can be set
-// through the environment variable named A_B_C = "42".
-// Additional env values can be used with the `env` go tag.
+// Source returns a SourceFunc that updates a config from environment variables.
+// It uses reflection to traverse the config struct and sets fields based on environment variables.
+// The environment variable names are derived from the struct field names, converted to uppercase and
+// with nested fields separated by underscores. A struct field can specify additional environment
+// variable names using the `env` tag, comma separated.
 func Source[T any](envPrefix string) clicfg.SourceFunc[T] {
 	return func(_ context.Context, cfg *T) error {
 		_, err := recursivelyWalkThroughReflectValue(os.LookupEnv, reflect.ValueOf(cfg).Elem(), envPrefix, nil)
@@ -24,23 +25,34 @@ func Source[T any](envPrefix string) clicfg.SourceFunc[T] {
 	}
 }
 
+// recursivelyWalkThroughReflectValue recursively traverses a reflect.Value and sets fields from environment variables.
+//
+//	lookupEnv is a function to lookup environment variables.
+//	v is the current reflect.Value being processed.
+//	envPrefix is the prefix for the environment variable names.
+//	additionalEnvsToLookup are additional environment variable names specified in the `env` tag.
+//
+// It returns a boolean indicating if at least one environment variable was found and an error if any occurred.
 func recursivelyWalkThroughReflectValue(lookupEnv func(string) (string, bool), v reflect.Value, envPrefix string, additionalEnvsToLookup []string) (bool, error) {
 	t := v.Type()
 
-	switch t.Kind() { //nolint:exhaustive // all other cases handled in default
-	case reflect.Pointer:
+	switch t.Kind() {
+	case reflect.Pointer: // if it's a pointer, dereference it and continue recursively
 		if !v.IsNil() {
 			return recursivelyWalkThroughReflectValue(lookupEnv, v.Elem(), envPrefix, additionalEnvsToLookup)
 		}
 
+		// if the pointer is nil, create a new value of the underlying type
 		newV := reflect.New(v.Type().Elem())
+		// recursively process the new value
 		atLeastOneEnvFound, err := recursivelyWalkThroughReflectValue(lookupEnv, newV.Elem(), envPrefix, additionalEnvsToLookup)
+		// if at least one environment variable was found for the nested struct, set the pointer
 		if atLeastOneEnvFound {
 			v.Set(newV)
 		}
 		return atLeastOneEnvFound, err
 
-	case reflect.Struct:
+	case reflect.Struct: // if it's a struct, iterate over its fields
 		var (
 			errs            []error
 			atLeastOneFound bool
@@ -49,10 +61,12 @@ func recursivelyWalkThroughReflectValue(lookupEnv func(string) (string, bool), v
 			tfield := t.Field(i)
 			tag := tfield.Tag.Get("env")
 
+			// skip unexported fields and fields with `env:"-"`
 			if tfield.PkgPath != "" || tag == "-" {
 				continue
 			}
 
+			// recursively process each field, constructing the environment variable name
 			envFound, err := recursivelyWalkThroughReflectValue(lookupEnv, v.Field(i), envPrefix+"_"+strings.ToUpper(tfield.Name), strings.Split(tag, ","))
 			if envFound {
 				atLeastOneFound = true
@@ -61,7 +75,7 @@ func recursivelyWalkThroughReflectValue(lookupEnv func(string) (string, bool), v
 		}
 		return atLeastOneFound, multierr.Combine(errs...)
 
-	default:
+	default: // for primitive types, try to find the corresponding environment variable
 		var rawEnv string
 		for _, envToLookup := range append(additionalEnvsToLookup, envPrefix) {
 			envToLookup = strings.TrimSpace(envToLookup)
@@ -72,11 +86,13 @@ func recursivelyWalkThroughReflectValue(lookupEnv func(string) (string, bool), v
 				}
 			}
 		}
+		// no environment variable is found, return
 		if rawEnv == "" {
 			return false, nil
 		}
 
-		switch k := t.Kind(); k { //nolint:exhaustive // all other cases handled in default
+		// convert the environment variable value to the field's type and set it
+		switch k := t.Kind(); k {
 		case reflect.Bool:
 			vv, err := strconv.ParseBool(rawEnv)
 			v.SetBool(vv)

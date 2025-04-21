@@ -6,7 +6,10 @@ import (
 	"github.com/krostar/cli"
 )
 
-// Execute executes the CLI with the spf13/cobra backend. Provided args are supposed to contain binary name.
+// Execute executes the CLI with the spf13/cobra backend.
+// Provided args are supposed to contain binary name.
+// It builds the Cobra command tree from the provided `cli.CLI` instance,
+// sets the arguments, and then executes the Cobra command.
 func Execute(ctx context.Context, args []string, c *cli.CLI) error {
 	if len(args) > 0 {
 		c.Name = args[0]

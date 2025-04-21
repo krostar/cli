@@ -1,11 +1,13 @@
 package cli
 
 import (
+	"errors"
+	"strings"
 	"testing"
 	"time"
 
-	"gotest.tools/v3/assert"
-	"gotest.tools/v3/assert/cmp"
+	"github.com/krostar/test"
+	"github.com/krostar/test/check"
 )
 
 func Test_NewFlagValuer(t *testing.T) {
@@ -14,51 +16,51 @@ func Test_NewFlagValuer(t *testing.T) {
 
 		valuer := NewFlagValuer(&d, time.ParseDuration, func(d time.Duration) string { return d.String() })
 
-		assert.Check(t, valuer.Destination() == &d)
-		assert.Check(t, valuer.TypeRepr() == "time.Duration")
-		assert.Check(t, !valuer.IsSet())
-		assert.ErrorContains(t, valuer.FromString("abc"), "invalid duration")
-		assert.Check(t, !valuer.IsSet())
-		assert.Check(t, valuer.FromString("4s"))
-		assert.Check(t, valuer.IsSet())
-		assert.Check(t, d == 4*time.Second)
+		test.Assert(t, valuer.Destination() == &d)
+		test.Assert(t, valuer.TypeRepr() == "time.Duration")
+		test.Assert(t, !valuer.IsSet())
+
+		err := valuer.FromString("abc")
+		test.Assert(t, err != nil && strings.Contains(err.Error(), "invalid duration"))
+
+		test.Assert(t, !valuer.IsSet())
+		test.Assert(t, valuer.FromString("4s") == nil)
+		test.Assert(t, valuer.IsSet())
+		test.Assert(t, d == 4*time.Second)
 
 		value := valuer.String()
-		assert.Check(t, value == "4s")
+		test.Assert(t, value == "4s")
 	})
 
 	t.Run("nil parameters", func(t *testing.T) {
 		var d time.Duration
 
-		assert.Check(t, func() (result cmp.Result) {
-			defer func() {
-				if reason := recover(); reason != nil {
-					result = cmp.Equal(reason, "destination is nil")()
-				}
-			}()
+		test.Assert(check.Panics(t, func() {
 			NewFlagValuer(nil, time.ParseDuration, func(d time.Duration) string { return d.String() })
-			return cmp.ResultFailure("did not panic")
-		})
+		}, func(reason any) error {
+			if strings.Contains(reason.(string), "destination is nil") {
+				return nil
+			}
+			return errors.New("expected different panic reason")
+		}))
 
-		assert.Check(t, func() (result cmp.Result) {
-			defer func() {
-				if reason := recover(); reason != nil {
-					result = cmp.Equal(reason, "parse is nil")()
-				}
-			}()
+		test.Assert(check.Panics(t, func() {
 			NewFlagValuer(&d, nil, func(d time.Duration) string { return d.String() })
-			return cmp.ResultFailure("did not panic")
-		})
+		}, func(reason any) error {
+			if strings.Contains(reason.(string), "parse is nil") {
+				return nil
+			}
+			return errors.New("expected different panic reason")
+		}))
 
-		assert.Check(t, func() (result cmp.Result) {
-			defer func() {
-				if reason := recover(); reason != nil {
-					result = cmp.Equal(reason, "toString is nil")()
-				}
-			}()
+		test.Assert(check.Panics(t, func() {
 			NewFlagValuer(&d, time.ParseDuration, nil)
-			return cmp.ResultFailure("did not panic")
-		})
+		}, func(reason any) error {
+			if strings.Contains(reason.(string), "toString is nil") {
+				return nil
+			}
+			return errors.New("expected different panic reason")
+		}))
 	})
 }
 
@@ -68,38 +70,39 @@ func Test_NewStringerFlagValuer(t *testing.T) {
 
 		valuer := NewStringerFlagValuer(&d, time.ParseDuration)
 
-		assert.Check(t, valuer.TypeRepr() == "time.Duration")
-		assert.Check(t, !valuer.IsSet())
-		assert.ErrorContains(t, valuer.FromString("abc"), "invalid duration")
-		assert.Check(t, !valuer.IsSet())
-		assert.Check(t, valuer.FromString("4s"))
-		assert.Check(t, valuer.IsSet())
+		test.Assert(t, valuer.TypeRepr() == "time.Duration")
+		test.Assert(t, !valuer.IsSet())
+
+		err := valuer.FromString("abc")
+		test.Assert(t, err != nil && strings.Contains(err.Error(), "invalid duration"))
+
+		test.Assert(t, !valuer.IsSet())
+		test.Assert(t, valuer.FromString("4s") == nil)
+		test.Assert(t, valuer.IsSet())
 
 		value := valuer.String()
-		assert.Check(t, value == "4s")
+		test.Assert(t, value == "4s")
 	})
 
 	t.Run("nil parameters", func(t *testing.T) {
 		var d time.Duration
 
-		assert.Check(t, func() (result cmp.Result) {
-			defer func() {
-				if reason := recover(); reason != nil {
-					result = cmp.Equal(reason, "destination is nil")()
-				}
-			}()
+		test.Assert(check.Panics(t, func() {
 			NewStringerFlagValuer(nil, time.ParseDuration)
-			return cmp.ResultFailure("did not panic")
-		})
+		}, func(reason any) error {
+			if strings.Contains(reason.(string), "destination is nil") {
+				return nil
+			}
+			return errors.New("expected different panic reason")
+		}))
 
-		assert.Check(t, func() (result cmp.Result) {
-			defer func() {
-				if reason := recover(); reason != nil {
-					result = cmp.Equal(reason, "parse is nil")()
-				}
-			}()
+		test.Assert(check.Panics(t, func() {
 			NewStringerFlagValuer(&d, nil)
-			return cmp.ResultFailure("did not panic")
-		})
+		}, func(reason any) error {
+			if strings.Contains(reason.(string), "parse is nil") {
+				return nil
+			}
+			return errors.New("expected different panic reason")
+		}))
 	})
 }

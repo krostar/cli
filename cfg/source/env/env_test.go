@@ -1,10 +1,11 @@
 package sourceenv
 
 import (
-	"context"
+	"strings"
 	"testing"
 
-	"gotest.tools/v3/assert"
+	"github.com/krostar/test"
+	"github.com/krostar/test/check"
 )
 
 type configWithEnv struct {
@@ -100,9 +101,8 @@ func Test_Source(t *testing.T) {
 			},
 		}
 
-		assert.NilError(t, Source[configWithEnv]("CUSTOMTESTENV")(context.Background(), &cfg))
-
-		assert.DeepEqual(t, cfg, configWithEnv{
+		test.Require(t, Source[configWithEnv]("CUSTOMTESTENV")(test.Context(t), &cfg) == nil)
+		test.Assert(check.Compare(t, cfg, configWithEnv{
 			A: "A",
 			B: &struct {
 				B1 string
@@ -154,14 +154,15 @@ func Test_Source(t *testing.T) {
 				D16: "D16",
 			},
 			E: nil,
-		})
+		}))
 	})
+
 	t.Run("unhandled type", func(t *testing.T) {
 		t.Setenv("CUSTOMTESTENV_D_D2", "foo")
 		t.Setenv("CUSTOMTESTENV_E", "foo")
 
-		err := Source[configWithEnv]("CUSTOMTESTENV")(context.Background(), new(configWithEnv))
-		assert.ErrorContains(t, err, "strconv.ParseInt")
-		assert.ErrorContains(t, err, "unhandled type map")
+		err := Source[configWithEnv]("CUSTOMTESTENV")(test.Context(t), new(configWithEnv))
+		test.Assert(t, err != nil && strings.Contains(err.Error(), "strconv.ParseInt"))
+		test.Assert(t, err != nil && strings.Contains(err.Error(), "unhandled type map"))
 	})
 }

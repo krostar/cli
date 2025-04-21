@@ -4,40 +4,211 @@
 [![Latest tag](https://img.shields.io/github/v/tag/krostar/cli)](https://github.com/krostar/cli/tags)
 [![Go Report](https://goreportcard.com/badge/github.com/krostar/cli)](https://goreportcard.com/report/github.com/krostar/cli)
 
-# Command Line Interface made simpler
+# cli: Command Line Interface Made Simpler
 
-The main goal of this package is to avoid being too tightly coupled with existing CLI framework.
+The `cli` package provides a framework-agnostic way to define command-line interfaces in Go.
+Its primary goal is to decouple your application's CLI logic from specific CLI frameworks like `spf13/cobra` or `urfave/cli`.
+This allows for easier testing, greater flexibility, and the ability to switch between underlying CLI frameworks without significant code changes.
 
 ## Motivation
 
-As of today, there are some very nice frameworks to use to handle command line interface; one of them is [spf13/cobra](https://github.com/spf13/cobra);
-but it is not super obvious how to create something decoupled from cobra.
+Existing CLI frameworks, while powerful, often lead to tight coupling.
+Changing frameworks can require extensive rewrites.
 
-Why would someone want to do that ?
-- i was using [spf13/cobra](https://github.com/spf13/cobra) and wanted to try [urfave/cli](https://github.com/urfave/cli)
-    and it implied quite a lot of changes to my application
-- i tried to avoid using a framework, but I was reinventing a lot of stuff
-- frameworks expose you to a lot of features, but it comes with a lot of concepts, and two different frameworks does not necessarily come with the same concepts nor the same implementation
+`cli` aims to solve this by:
 
-I did not want to recreate yet a new CLI framework to solve my problem because existing ones already are complete,
-but I am not using a lot of features and I wanted to keep things simple to use, simple to test, and simple to extend.
+- **Abstraction**: Providing a simple, consistent interface for defining commands.
+- **Testability**: Making it easy to test command logic in isolation, without framework dependencies.
+- **Flexibility**: Allowing you to choose (and change) the underlying CLI framework that best suits your needs.
+- **Simplicity**: Focusing on core CLI functionality, avoiding unnecessary complexity.
 
 ## Usage
 
-The simplest command is defined by implementing the `Command` interface
+### Basic Command
+
+The simplest command implements the `Command` interface:
+
 ```go
+package main
+
+import (
+    "context"
+    "os"
+
+    "github.com/krostar/cli"
+    spf13cobra "github.com/krostar/cli/mapper/spf13/cobra"
+)
+
 type myCommand struct{}
+
 func (myCommand) Execute(ctx context.Context, args []string, dashedArgs []string) error {
+    // Your command logic here.
+    // args: Positional arguments.
+    // dashedArgs: Arguments after a "--".
     return nil
 }
 
 func main() {
-    cmd := cli.NewCommand(myCommand{})
+    cmd := cli.New(myCommand{})
     err := spf13cobra.Execute(context.Background(), os.Args, cmd)
-    cli.Exit(err)
+    cli.Exit(context.Background(), err)
 }
 ```
 
-This will create a CLI with one root command. This CLI is then mapped to be executed by the spf13/cobra framework.
+### Adding Subcommands
 
-A more useful / complex example can be found in `internal/example`.
+```go
+type subCommand struct{}
+
+func (subCommand) Execute(ctx context.Context, args []string, dashedArgs []string) error {
+    // Subcommand logic.
+    return nil
+}
+
+func main() {
+    cmd := cli.New(myCommand{}).AddCommand("sub", subCommand{}) // Add a subcommand named "sub".
+
+    // Or, mount a complete CLI as a subcommand:
+    subCLI := cli.New(subCommand{})
+    cmd.Mount("another", subCLI)
+
+    err := spf13cobra.Execute(context.Background(), os.Args, cmd)
+    cli.Exit(context.Background(), err)
+}
+```
+
+### Flags
+
+```go
+type flagCommand struct {
+    name string
+    age  int
+    tags []string
+}
+
+func (c *flagCommand) Flags() []cli.Flag {
+    return []cli.Flag{
+        cli.NewBuiltinFlag("name", "", &c.name, "Your name"),
+        cli.NewBuiltinFlag("age", "", &c.age, "Your age"),
+        cli.NewBuiltinSliceFlag("tags", "t", &c.tags, "Comma-separated tags"),
+    }
+}
+
+func (c *flagCommand) Execute(ctx context.Context, args []string, dashedArgs []string) error {
+    // Access flag values: c.name, c.age, c.tags
+    return nil
+}
+```
+
+### Hooks
+
+```go
+type hookedCommand struct{}
+
+func (hookedCommand) Execute(ctx context.Context, args []string, dashedArgs []string) error {
+    // command logic
+    return nil
+}
+
+func (c hookedCommand) Hook() *cli.Hook {
+    return &cli.Hook{
+        BeforeCommandExecution: func(ctx context.Context) error {
+            // Code to run before Execute.
+            return nil
+        },
+        AfterCommandExecution: func(ctx context.Context) error {
+            // Code to run after Execute.
+            return nil
+        },
+    }
+}
+```
+
+### Signal Handling
+
+```go
+func main() {
+    ctx, cancel := cli.NewContextCancelableBySignal(syscall.SIGINT, syscall.SIGTERM)
+    defer cancel()
+
+    err := spf13cobra.Execute(ctx, os.Args, /* ... */)
+    cli.Exit(ctx, err)
+}
+```
+
+## Configuration Management
+
+The `cli` package provides a powerful configuration system through the `cfg` package that allows loading configuration from multiple sources with precedence.
+
+### Configuration Sources
+
+The following sources are supported out of the box:
+
+- **Default Values**: Set default values for your configuration
+- **Environment Variables**: Load configuration from environment variables
+- **Configuration Files**: Load configuration from YAML/JSON files
+- **Command-line Flags**: Load configuration from command-line flags
+
+### Configuration Example
+
+```go
+import (
+    "github.com/krostar/cli"
+    clicfg "github.com/krostar/cli/cfg"
+    "github.com/krostar/cli/cfg/source/default"
+    "github.com/krostar/cli/cfg/source/env"
+    "github.com/krostar/cli/cfg/source/file"
+    "github.com/krostar/cli/cfg/source/flag"
+)
+
+// Config structure with environment variable mappings
+type Config struct {
+    Server struct {
+        Host string `env:"SERVER_HOST"`
+        Port int    `env:"SERVER_PORT"`
+    }
+    LogLevel   string `env:"LOG_LEVEL"`
+    ConfigFile string `env:"CONFIG_FILE"`
+}
+
+// SetDefault implements the default values
+func (cfg *Config) SetDefault() {
+    cfg.Server.Host = "localhost"
+    cfg.Server.Port = 8080
+    cfg.LogLevel = "info"
+    cfg.ConfigFile = "config.yaml"
+}
+
+// Command with configuration
+type MyCommand struct {
+    config Config
+}
+
+// Define flags that map to your configuration
+func (cmd *MyCommand) Flags() []cli.Flag {
+    return []cli.Flag{
+        cli.NewBuiltinFlag("config", "c", &cmd.config.ConfigFile, "Path to config file"),
+        cli.NewBuiltinFlag("host", "", &cmd.config.Server.Host, "Server host"),
+        cli.NewBuiltinFlag("port", "p", &cmd.config.Server.Port, "Server port"),
+        cli.NewBuiltinFlag("log-level", "l", &cmd.config.LogLevel, "Log level"),
+    }
+}
+
+// Use hooks to load configuration in order of precedence
+func (cmd *MyCommand) Hook() *cli.Hook {
+    return &cli.Hook{
+        BeforeCommandExecution: clicfg.BeforeCommandExecutionHook(
+            &cmd.config,
+            // Sources are applied in order, with later sources taking precedence
+            sourcedefault.Source[Config](),                              // 1. Defaults
+            sourcefile.Source(getConfigFilePath, yamlUnmarshaler, true), // 2. Config file
+            sourceenv.Source[Config]("APP"),                             // 3. Environment variables
+            sourceflag.Source[Config](cmd),                              // 4. Command-line flags
+        ),
+    }
+}
+```
+
+## License
+
+This project is licensed under the MIT License - see the LICENSE file for details.

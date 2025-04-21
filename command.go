@@ -3,49 +3,71 @@ package cli
 import "context"
 
 type (
-	// Command defines the minimal interface required to execute a CLI command.
+	// Command is the fundamental interface for all CLI commands.
 	Command interface {
 		Execute(ctx context.Context, args, dashedArgs []string) error
 	}
 
-	// CommandContext defines a way to propagate a custom context to child commands.
+	// CommandContext allows commands to customize the context passed to
+	// their subcommands. This is useful for propagating configuration,
+	// dependencies, or other context-specific data down the command tree.
 	CommandContext interface {
 		Context(ctx context.Context) context.Context
 	}
 
-	// CommandDescription defines a way to set a description on the command.
+	// CommandDescription allows a command to provide a human-readable
+	// description of its purpose. This is used for generating help text.
 	// A short description is created from the first description line.
 	CommandDescription interface{ Description() string }
-	// CommandExamples defines a way to set command examples.
+
+	// CommandExamples allows a command to provide usage examples. These
+	// examples are displayed in the help text to guide users on how to
+	// use the command.
 	CommandExamples interface{ Examples() []string }
-	// CommandUsage defines a way to set the way to use the command.
+
+	// CommandUsage allows a command to specify its argument usage pattern.
+	// This helps define how arguments should be passed to the command.
 	CommandUsage interface{ Usage() string }
 
-	// CommandFlags defines the flagValue of the command.
+	// CommandFlags allows a command to define command-line flags.
 	CommandFlags interface{ Flags() []Flag }
-	// CommandPersistentFlags defines the persistent flags of the command.
+
+	// CommandPersistentFlags allows a command to define flags that`
+	// are inherited by all of its subcommands.
 	CommandPersistentFlags interface{ PersistentFlags() []Flag }
 
-	// CommandHook defines some callback called during command lifecycle.
+	// CommandHook allows a command to define callbacks (hooks) that are
+	// executed at specific points in the command's lifecycle. This enables
+	// custom behavior before or after command execution.
 	CommandHook interface{ Hook() *Hook }
-	// CommandPersistentHook defines some persistent callback called during command lifecycle.
-	// Differences between CommandHook and CommandPersistentHook is that executed command's
-	// hierarchy will also be called.
+
+	// CommandPersistentHook allows a command to define persistent hooks
+	// that are executed for the command and all of its subcommands.
 	CommandPersistentHook interface{ PersistentHook() *PersistentHook }
 
-	// HookFunc defines the hook signature.
+	// HookFunc defines the signature for hook functions.
 	HookFunc func(ctx context.Context) error
 
-	// Hook defines callbacks to add custom behavior to the command lifecycle.
+	// Hook defines callbacks that are executed during the command lifecycle.
 	Hook struct {
+		// BeforeCommandExecution is called before the command's Execute method is invoked.
 		BeforeCommandExecution HookFunc
-		AfterCommandExecution  HookFunc
+		// AfterCommandExecution is called after the command's Execute
+		// method has completed (regardless of whether it returned an error).
+		AfterCommandExecution HookFunc
 	}
 
-	// PersistentHook defines callbacks to add custom behavior to the command lifecycle.
+	// PersistentHook defines callbacks that are executed for a command and all of its subcommands.
 	PersistentHook struct {
-		BeforeFlagsDefinition  HookFunc
+		// BeforeFlagsDefinition is called before the command's flags are
+		// processed. This is a good place to set up dependencies or
+		// perform initialization that affects flag parsing.
+		BeforeFlagsDefinition HookFunc
+		// BeforeCommandExecution is called before the command's Execute
+		// method is invoked (but after flag parsing).
 		BeforeCommandExecution HookFunc
-		AfterCommandExecution  HookFunc
+		// AfterCommandExecution is called after the command's Execute
+		// method has completed (regardless of whether it returned an error).
+		AfterCommandExecution HookFunc
 	}
 )

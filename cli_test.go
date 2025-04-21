@@ -4,7 +4,8 @@ import (
 	"context"
 	"testing"
 
-	"gotest.tools/v3/assert"
+	"github.com/krostar/test"
+	"github.com/krostar/test/check"
 )
 
 func Test_CLI(t *testing.T) {
@@ -21,37 +22,33 @@ func Test_CLI(t *testing.T) {
 		Mount("cmd3", New(cmd3).AddCommand("cmd31", cmd31)).
 		Mount("cmd4", New(cmd4))
 
-	assert.DeepEqual(t, cli, &CLI{
+	test.Assert(check.Compare(t, cli, &CLI{
 		Command: cmd0,
 		SubCommands: []*CLI{
 			{
-				Name:        "cmd1",
-				Command:     cmd1,
-				SubCommands: nil,
+				Name:    "cmd1",
+				Command: cmd1,
 			},
 			{
-				Name:        "cmd2",
-				Command:     cmd2,
-				SubCommands: nil,
+				Name:    "cmd2",
+				Command: cmd2,
 			},
 			{
 				Name:    "cmd3",
 				Command: cmd3,
 				SubCommands: []*CLI{
 					{
-						Name:        "cmd31",
-						Command:     cmd31,
-						SubCommands: nil,
+						Name:    "cmd31",
+						Command: cmd31,
 					},
 				},
 			},
 			{
-				Name:        "cmd4",
-				Command:     cmd4,
-				SubCommands: nil,
+				Name:    "cmd4",
+				Command: cmd4,
 			},
 		},
-	})
+	}))
 }
 
 type command0 struct{}

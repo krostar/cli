@@ -8,7 +8,7 @@ import (
 	"os"
 	"testing"
 
-	"gotest.tools/v3/assert"
+	"github.com/krostar/test"
 )
 
 type bufferThatCloses struct {
@@ -30,7 +30,7 @@ func Test_Exit(t *testing.T) {
 			exitMessage bufferThatCloses
 		)
 
-		Exit(context.Background(), nil,
+		Exit(test.Context(t), nil,
 			WithExitFunc(func(status int) {
 				exitStatus = &status
 			}),
@@ -39,10 +39,10 @@ func Test_Exit(t *testing.T) {
 			}),
 		)
 
-		assert.Assert(t, exitStatus != nil)
-		assert.Check(t, *exitStatus == 0)
-		assert.Check(t, exitMessage.String() == "")
-		assert.Check(t, exitMessage.Closed())
+		test.Require(t, exitStatus != nil)
+		test.Assert(t, *exitStatus == 0)
+		test.Assert(t, exitMessage.String() == "")
+		test.Assert(t, exitMessage.Closed())
 	})
 
 	t.Run("error", func(t *testing.T) {
@@ -52,7 +52,7 @@ func Test_Exit(t *testing.T) {
 				exitMessage bufferThatCloses
 			)
 
-			Exit(context.Background(), errors.New("boom"),
+			Exit(test.Context(t), errors.New("boom"),
 				WithExitFunc(func(status int) {
 					exitStatus = &status
 				}),
@@ -61,10 +61,10 @@ func Test_Exit(t *testing.T) {
 				}),
 			)
 
-			assert.Assert(t, exitStatus != nil)
-			assert.Check(t, *exitStatus == 255)
-			assert.Check(t, exitMessage.String() == "boom\n")
-			assert.Check(t, exitMessage.Closed())
+			test.Require(t, exitStatus != nil)
+			test.Assert(t, *exitStatus == 255)
+			test.Assert(t, exitMessage.String() == "boom\n")
+			test.Assert(t, exitMessage.Closed())
 		})
 
 		t.Run("with custom status", func(t *testing.T) {
@@ -73,7 +73,7 @@ func Test_Exit(t *testing.T) {
 				exitMessage bufferThatCloses
 			)
 
-			Exit(context.Background(), NewErrorWithExitStatus(errors.New("boom"), 42),
+			Exit(test.Context(t), NewErrorWithExitStatus(errors.New("boom"), 42),
 				WithExitFunc(func(status int) {
 					exitStatus = &status
 				}),
@@ -82,10 +82,10 @@ func Test_Exit(t *testing.T) {
 				}),
 			)
 
-			assert.Assert(t, exitStatus != nil)
-			assert.Check(t, *exitStatus == 42)
-			assert.Check(t, exitMessage.String() == "boom\n")
-			assert.Check(t, exitMessage.Closed())
+			test.Require(t, exitStatus != nil)
+			test.Assert(t, *exitStatus == 42)
+			test.Assert(t, exitMessage.String() == "boom\n")
+			test.Assert(t, exitMessage.Closed())
 		})
 	})
 }
@@ -94,21 +94,21 @@ func Test_ExitOption(t *testing.T) {
 	o := new(exitOptions)
 
 	WithExitFunc(os.Exit)(o)
-	assert.Assert(t, o.exitFunc != nil)
+	test.Require(t, o.exitFunc != nil)
 
 	WithExitLoggerFunc(getExitLoggerFromMetadata)(o)
-	assert.Assert(t, o.getLoggerFunc != nil)
+	test.Require(t, o.getLoggerFunc != nil)
 }
 
 func Test_loggerInMetadata(t *testing.T) {
 	t.Run("get a logger even if none is previously set", func(t *testing.T) {
-		assert.Assert(t, getExitLoggerFromMetadata(context.Background()) != nil)
+		test.Require(t, getExitLoggerFromMetadata(test.Context(t)) != nil)
 	})
 
 	t.Run("set a logger", func(t *testing.T) {
-		ctx := NewContextWithMetadata(context.Background())
+		ctx := NewContextWithMetadata(test.Context(t))
 		logger := new(bufferThatCloses)
 		SetExitLoggerInMetadata(ctx, logger)
-		assert.Check(t, getExitLoggerFromMetadata(ctx) == logger)
+		test.Assert(t, getExitLoggerFromMetadata(ctx) == logger)
 	})
 }

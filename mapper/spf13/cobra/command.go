@@ -13,6 +13,9 @@ import (
 	mapper "github.com/krostar/cli/mapper/internal"
 )
 
+// buildCobraCommandFromCLIRecursively constructs a `cobra.Command` from a `cli.CLI` instance.
+// It recursively processes subcommands, creating a tree of `cobra.Command`s that mirrors the
+// structure of the `cli.CLI`.
 func buildCobraCommandFromCLIRecursively(ctx context.Context, c *cli.CLI) (*cobra.Command, error) {
 	ctx = cli.NewCommandContext(ctx)
 	ctx = mapper.Context(c.Command, ctx)
@@ -33,6 +36,7 @@ func buildCobraCommandFromCLIRecursively(ctx context.Context, c *cli.CLI) (*cobr
 	return command, nil
 }
 
+// buildCobraCommandFromCLICommand creates a single `cobra.Command` from a `cli.Command`.
 func buildCobraCommandFromCLICommand(ctx context.Context, commandName string, cliCommand cli.Command) (*cobra.Command, error) {
 	var commandExample string
 	if examples := mapper.Examples(cliCommand); len(examples) > 0 {
@@ -69,6 +73,9 @@ func buildCobraCommandFromCLICommand(ctx context.Context, commandName string, cl
 	return cobraCommand, nil
 }
 
+// getCommandArguments separates the arguments passed to a command into positional arguments
+// and dashed arguments (arguments after "--"). It uses the `ArgsLenAtDash` method of the
+// `cobra.Command` to determine the split point.
 func getCommandArguments(command *cobra.Command, args []string) ([]string, []string) {
 	switch argsSeparatedAt := command.ArgsLenAtDash(); {
 	case len(args) == 0:
@@ -82,6 +89,9 @@ func getCommandArguments(command *cobra.Command, args []string) ([]string, []str
 	}
 }
 
+// cobraHandlerFromCLIHandler adapts a `cli.Command`'s `Execute` method to the `cobra.Command`'s `RunE` function signature.
+// It handles the argument splitting and calls the `Execute` method with the appropriate context and arguments.
+// It also handles the `ShowHelpError`, displaying the command's usage if required.
 func cobraHandlerFromCLIHandler(ctx context.Context, cmd cli.Command) func(*cobra.Command, []string) error {
 	return func(c *cobra.Command, args []string) error {
 		args, dashedArgs := getCommandArguments(c, args)
@@ -99,6 +109,9 @@ func cobraHandlerFromCLIHandler(ctx context.Context, cmd cli.Command) func(*cobr
 	}
 }
 
+// setCobraHooksFromCLIHooks sets the pre-run and post-run hooks for a `cobra.Command`
+// based on the `cli.Hook` and `cli.PersistentHook` provided. It ensures that persistent
+// hooks are executed in the correct order (parent first, then child).
 func setCobraHooksFromCLIHooks(ctx context.Context, c *cobra.Command, hook *cli.Hook, persistentHook *cli.PersistentHook) error {
 	if err := persistentHook.BeforeFlagsDefinition(ctx); err != nil {
 		return fmt.Errorf("pre-flag-definition hook failed: %w", err)

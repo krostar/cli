@@ -5,25 +5,21 @@
 }: let
   inherit (deps.harmony.result.data.harmony.ci.linters) golangci-lint;
 in {
-  ci.linters.golangci-lint = lib.mkForce (lib.attrsets.recursiveUpdate golangci-lint {
-    issues.exclude-dirs = ["internal/example"];
-
-    linters-settings = {
-      depguard.rules.all.deny = [
+  ci.linters.golangci-lint.linters = {
+    exclusions = {
+      paths = ["internal/example"];
+      rules = [
         {
-          pkg = "github.com/pkg/errors";
-          desc = "use go1.13 errors";
+          path = "cfg/source/env/|cfg/source/flag/";
+          linters = ["depguard"];
+          text = "import 'reflect' is not allowed";
         }
       ];
+    };
+
+    settings = {
+      iface.enable = lib.mkForce ["identical"];
       importas.alias = [
-        {
-          pkg = "github.com/google/go-cmp/cmp";
-          alias = "gocmp";
-        }
-        {
-          pkg = "github.com/google/go-cmp/cmp/cmpopts";
-          alias = "gocmpopts";
-        }
         {
           pkg = "github.com/krostar/cli/mapper/internal";
           alias = "mapper";
@@ -34,5 +30,5 @@ in {
         }
       ];
     };
-  });
+  };
 }

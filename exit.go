@@ -8,7 +8,8 @@ import (
 	"os"
 )
 
-// Exit exits the program and uses provided error to define program success or failure.
+// Exit terminates the CLI application, handling errors and setting the
+// appropriate exit status code.
 func Exit(ctx context.Context, err error, options ...ExitOption) {
 	o := exitOptions{
 		exitFunc:      os.Exit,
@@ -39,12 +40,12 @@ func Exit(ctx context.Context, err error, options ...ExitOption) {
 
 	if msg != "" {
 		if _, err := io.WriteString(writer, msg+"\n"); err != nil {
-			_, _ = os.Stderr.WriteString(fmt.Sprintf("unable to write program exit message: %v", err)) //nolint:errcheck // we can't properly handle writing error on stderr
+			_, _ = fmt.Fprintf(os.Stderr, "unable to write program exit message: %v", err)
 		}
 	}
 
 	if err := writer.Close(); err != nil {
-		_, _ = os.Stderr.WriteString(fmt.Sprintf("unable to close writer: %v", err)) //nolint:errcheck // we can't properly handle writing error on stderr
+		_, _ = fmt.Fprintf(os.Stderr, "unable to close writer: %v", err)
 	}
 
 	o.exitFunc(int(status))
@@ -55,10 +56,11 @@ type exitOptions struct {
 	getLoggerFunc func(context.Context) io.WriteCloser
 }
 
-// ExitOption defines the function signature to configure things upon exit.
+// ExitOption defines the function signature for options that can be passed to the Exit function.
 type ExitOption func(*exitOptions)
 
-// WithExitFunc defines a custom function to exit.
+// WithExitFunc allows overriding the default exit function (os.Exit) with a
+// custom function. This is primarily useful for testing.
 func WithExitFunc(exitFunc func(status int)) ExitOption {
 	return func(o *exitOptions) {
 		o.exitFunc = exitFunc

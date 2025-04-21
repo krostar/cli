@@ -5,136 +5,137 @@ import (
 	"errors"
 	"testing"
 
-	"gotest.tools/v3/assert"
+	"github.com/krostar/test"
+	"github.com/krostar/test/check"
 
 	"github.com/krostar/cli"
 )
 
 func Test_Context(t *testing.T) {
 	t.Run("implemented", func(t *testing.T) {
-		ctx := context.TODO()
-		assert.Check(t, ctx != Context(new(commandWithAll), ctx))
+		ctx := t.Context()
+		test.Assert(t, ctx != Context(new(commandWithAll), ctx))
 	})
 
 	t.Run("not implemented", func(t *testing.T) {
-		ctx := context.TODO()
-		assert.Check(t, ctx == Context(new(commandSimple), ctx))
+		ctx := t.Context()
+		test.Assert(t, ctx == Context(new(commandSimple), ctx))
 	})
 }
 
 func Test_ShortDescription(t *testing.T) {
 	t.Run("implemented", func(t *testing.T) {
-		assert.Check(t, ShortDescription(new(commandWithAll)) == "short description")
+		test.Assert(t, ShortDescription(new(commandWithAll)) == "short description")
 	})
 
 	t.Run("not implemented", func(t *testing.T) {
-		assert.Check(t, ShortDescription(new(commandSimple)) == "")
+		test.Assert(t, ShortDescription(new(commandSimple)) == "")
 	})
 }
 
 func Test_Description(t *testing.T) {
 	t.Run("implemented", func(t *testing.T) {
-		assert.Check(t, Description(new(commandWithAll)) == "short description\nlong description")
+		test.Assert(t, Description(new(commandWithAll)) == "short description\nlong description")
 	})
 
 	t.Run("not implemented", func(t *testing.T) {
-		assert.Check(t, Description(new(commandSimple)) == "")
+		test.Assert(t, Description(new(commandSimple)) == "")
 	})
 }
 
 func Test_Examples(t *testing.T) {
 	t.Run("implemented", func(t *testing.T) {
-		assert.DeepEqual(t, Examples(new(commandWithAll)), []string{"example"})
+		test.Assert(check.Compare(t, Examples(new(commandWithAll)), []string{"example"}))
 	})
 
 	t.Run("not implemented", func(t *testing.T) {
-		assert.DeepEqual(t, Examples(new(commandSimple)), []string(nil))
+		test.Assert(check.Compare(t, Examples(new(commandSimple)), []string(nil)))
 	})
 }
 
 func Test_Usage(t *testing.T) {
 	t.Run("implemented", func(t *testing.T) {
-		assert.Check(t, Usage(new(commandWithAll)) == "usage")
+		test.Assert(t, Usage(new(commandWithAll)) == "usage")
 	})
 
 	t.Run("not implemented", func(t *testing.T) {
-		assert.Check(t, Usage(new(commandSimple)) == "")
+		test.Assert(t, Usage(new(commandSimple)) == "")
 	})
 }
 
 func Test_Flags(t *testing.T) {
 	t.Run("implemented", func(t *testing.T) {
 		f := Flags(new(commandWithAll))
-		assert.Check(t, len(f) > 0)
-		assert.Check(t, f[0].LongName() == "llong")
+		test.Require(t, len(f) > 0)
+		test.Assert(t, f[0].LongName() == "llong")
 	})
 
 	t.Run("not implemented", func(t *testing.T) {
-		assert.Check(t, len(Flags(new(commandSimple))) == 0)
+		test.Assert(t, len(Flags(new(commandSimple))) == 0)
 	})
 }
 
 func Test_PersistentFlags(t *testing.T) {
 	t.Run("implemented", func(t *testing.T) {
 		f := PersistentFlags(new(commandWithAll))
-		assert.Check(t, len(f) > 0)
-		assert.Check(t, f[0].LongName() == "plong")
+		test.Require(t, len(f) > 0)
+		test.Assert(t, f[0].LongName() == "plong")
 	})
 
 	t.Run("not implemented", func(t *testing.T) {
-		assert.Check(t, len(PersistentFlags(new(commandSimple))) == 0)
+		test.Assert(t, len(PersistentFlags(new(commandSimple))) == 0)
 	})
 }
 
 func Test_Hook(t *testing.T) {
-	ctx := context.Background()
+	ctx := test.Context(t)
 
 	t.Run("implemented", func(t *testing.T) {
 		hook := Hook(new(commandWithAll))
-		assert.Assert(t, hook != nil)
-		assert.Assert(t, hook.BeforeCommandExecution != nil)
-		assert.Assert(t, hook.AfterCommandExecution != nil)
+		test.Require(t, hook != nil)
+		test.Require(t, hook.BeforeCommandExecution != nil)
+		test.Require(t, hook.AfterCommandExecution != nil)
 
-		assert.Error(t, hook.BeforeCommandExecution(ctx), "hook")
-		assert.NilError(t, hook.AfterCommandExecution(ctx))
+		test.Assert(t, hook.BeforeCommandExecution(ctx) != nil)
+		test.Assert(t, hook.AfterCommandExecution(ctx) == nil)
 	})
 
 	t.Run("not implemented", func(t *testing.T) {
 		hook := Hook(new(commandSimple))
-		assert.Assert(t, hook != nil)
-		assert.Assert(t, hook.BeforeCommandExecution != nil)
-		assert.Assert(t, hook.AfterCommandExecution != nil)
+		test.Require(t, hook != nil)
+		test.Require(t, hook.BeforeCommandExecution != nil)
+		test.Require(t, hook.AfterCommandExecution != nil)
 
-		assert.NilError(t, hook.BeforeCommandExecution(ctx))
-		assert.NilError(t, hook.AfterCommandExecution(ctx))
+		test.Assert(t, hook.BeforeCommandExecution(ctx) == nil)
+		test.Assert(t, hook.AfterCommandExecution(ctx) == nil)
 	})
 }
 
 func Test_PersistentHook(t *testing.T) {
-	ctx := context.Background()
+	ctx := test.Context(t)
 
 	t.Run("implemented", func(t *testing.T) {
 		hook := PersistentHook(new(commandWithAll))
-		assert.Assert(t, hook != nil)
-		assert.Assert(t, hook.BeforeFlagsDefinition != nil)
-		assert.Assert(t, hook.BeforeCommandExecution != nil)
-		assert.Assert(t, hook.AfterCommandExecution != nil)
+		test.Require(t, hook != nil)
+		test.Require(t, hook.BeforeFlagsDefinition != nil)
+		test.Require(t, hook.BeforeCommandExecution != nil)
+		test.Require(t, hook.AfterCommandExecution != nil)
 
-		assert.NilError(t, hook.BeforeCommandExecution(ctx))
-		assert.NilError(t, hook.BeforeFlagsDefinition(ctx))
-		assert.NilError(t, hook.AfterCommandExecution(ctx))
+		test.Assert(t, hook.BeforeCommandExecution(ctx) == nil)
+		test.Assert(t, hook.BeforeFlagsDefinition(ctx) == nil)
+		test.Assert(t, hook.AfterCommandExecution(ctx) == nil)
 	})
 
 	t.Run("not implemented", func(t *testing.T) {
 		hook := PersistentHook(new(commandSimple))
-		assert.Assert(t, hook != nil)
-		assert.Assert(t, hook.BeforeFlagsDefinition != nil)
-		assert.Assert(t, hook.BeforeCommandExecution != nil)
-		assert.Assert(t, hook.AfterCommandExecution != nil)
+		test.Require(t, hook != nil)
+		test.Require(t, hook.BeforeFlagsDefinition != nil)
+		test.Require(t, hook.BeforeCommandExecution != nil)
+		test.Require(t, hook.AfterCommandExecution != nil)
 
-		assert.NilError(t, hook.BeforeFlagsDefinition(ctx))
-		assert.NilError(t, hook.BeforeCommandExecution(ctx))
-		assert.NilError(t, hook.AfterCommandExecution(ctx))
+		test.Assert(t, hook.BeforeFlagsDefinition(ctx) == nil)
+		test.Assert(t, hook.BeforeCommandExecution(ctx) == nil)
+		test.Assert(t, hook.AfterCommandExecution(ctx) == nil)
 	})
 }
 

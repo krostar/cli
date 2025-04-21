@@ -1,24 +1,27 @@
 package cli
 
-// Flag defines a flagValue.
+// Flag represents a command-line flag. It combines the FlagValuer interface
+// with methods to access flag metadata (long name, short name, description).
 type Flag interface {
 	// FlagValuer defines methods to get and set flag's value.
 	FlagValuer
 
-	// LongName if non-empty, defines the long name of the flag like --long.
+	// LongName returns the long name of the flag (e.g., "--verbose").
 	LongName() string
-	// ShortName if non-empty, defines the short name of the flag like -s.
+	// ShortName returns the short name of the flag (e.g., "-v"). May be empty.
 	ShortName() string
-	// Description describes the flag display purpose.
+	// Description returns a description of the flag's purpose.
 	Description() string
 }
 
-// NewFlag creates a Flag based on any underlying destination type.
+// NewFlag creates a new Flag instance.
 //
 //	longName is the long flag name, like --longname ; cannot be empty.
 //	shortName is the short flag name ; usually 1 character, like -s ; can be empty.
 //	valuer provide the way to set value to the destination.
 //	description is a short text explaining the flag ; can be empty.
+//
+// It panics if invalid inputs are provided.
 func NewFlag(longName, shortName string, valuer FlagValuer, description string) Flag {
 	if longName == "" && shortName == "" {
 		panic("longName and/or shortName must be non-empty")

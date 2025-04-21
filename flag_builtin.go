@@ -6,12 +6,9 @@ import (
 	"strings"
 )
 
-// NewBuiltinFlag creates a new Flag which underlying type is any builtin type declared below.
-//
-//	longName is the long flagValue name, like --longname ; cannot be empty.
-//	shortName is the short flagValue name ; usually 1 character, like -s ; can be empty.
-//	destination is a pointer on the variable on which flagValue's value will be stored ; cannot be nil.
-//	description is a short text explaining the flagValue ; can be empty.
+// NewBuiltinFlag creates a Flag for built-in types (int, string, bool, etc.).
+// It handles the conversion between string representations and the underlying
+// Go type. See NewFlag for more details.
 func NewBuiltinFlag[T builtins](longName, shortName string, destination *T, description string) Flag {
 	return NewFlag(
 		longName, shortName,
@@ -20,12 +17,8 @@ func NewBuiltinFlag[T builtins](longName, shortName string, destination *T, desc
 	)
 }
 
-// NewBuiltinPointerFlag creates a new Flag which underlying type is any pointer on builtin type declared below.
-//
-//	longName is the long flagValue name, like --longname ; cannot be empty.
-//	shortName is the short flagValue name ; usually 1 character, like -s ; can be empty.
-//	destination is a pointer on the variable on which flagValue's value will be stored ; cannot be nil.
-//	description is a short text explaining the flagValue ; can be empty.
+// NewBuiltinPointerFlag creates a Flag for pointers to built-in types.
+// See NewBuiltinFlag for more details.
 func NewBuiltinPointerFlag[T builtins](longName, shortName string, destination **T, description string) Flag {
 	return NewFlag(
 		longName, shortName,
@@ -47,12 +40,9 @@ func NewBuiltinPointerFlag[T builtins](longName, shortName string, destination *
 	)
 }
 
-// NewBuiltinSliceFlag creates a new Flag which underlying type is any slice of builtin type declared below.
-//
-//	longName is the long flagValue name, like --longname ; cannot be empty.
-//	shortName is the short flagValue name ; usually 1 character, like -s ; can be empty.
-//	destination is a pointer on the variable on which flagValue's value will be stored ; cannot be nil.
-//	description is a short text explaining the flagValue ; can be empty.
+// NewBuiltinSliceFlag creates a Flag for slices of built-in types.
+// The flag value is expected to be a comma-separated list of values.
+// See NewBuiltinFlag for more details.
 func NewBuiltinSliceFlag[T builtins](longName, shortName string, destination *[]T, description string) Flag {
 	return NewFlag(
 		longName, shortName,
@@ -87,7 +77,11 @@ type builtins interface {
 	bool | string | int | int8 | int16 | int32 | int64 | uint | uint8 | uint16 | uint32 | uint64 | float32 | float64 | complex64 | complex128
 }
 
-//nolint:revive // unchecked-type-assertion: linter does not like the (T) cast that is unchecked, but nothing to worry about here
+// builtinFromString converts a string to a built-in type. It uses a generic
+// type parameter constrained by `builtins` and a type switch to handle the
+// different conversions.
+//
+//nolint:revive,errcheck // unchecked-type-assertion: linter does not like the (T) cast that is unchecked, but nothing to worry about here
 func builtinFromString[T builtins](raw string) (T, error) {
 	newT := *new(T)
 
@@ -145,6 +139,8 @@ func builtinFromString[T builtins](raw string) (T, error) {
 	}
 }
 
+// builtinToString converts a built-in type to its string representation.
+//
 //nolint:mnd // don't lint for hardcoded number for precision
 func builtinToString[T builtins](t T) string {
 	switch t := any(t).(type) {

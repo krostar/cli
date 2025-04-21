@@ -14,8 +14,7 @@ import (
 type contextKey int8
 
 const (
-	contextKeyUnknown contextKey = iota
-	contextKeyDIContainer
+	contextKeyDIContainer contextKey = iota + 1
 	contextKeyDIProvideErrors
 )
 
@@ -31,7 +30,9 @@ func InitializeContainer(ctx context.Context, opts ...dig.Option) {
 	cli.SetMetadataInContext(ctx, contextKeyDIContainer, dig.New(opts...))
 }
 
-// AddProvider provides a function f to the list of DI providers set in the DI container.
+// AddProvider adds a constructor function (f) to the dig.Container stored in
+// the context. Any errors encountered during provider registration are
+// collected and can be retrieved later using Invoke.
 func AddProvider(ctx context.Context, f any, opts ...dig.ProvideOption) {
 	container, exists := cli.GetMetadataFromContext(ctx, contextKeyDIContainer).(*dig.Container)
 	if !exists {
@@ -39,19 +40,23 @@ func AddProvider(ctx context.Context, f any, opts ...dig.ProvideOption) {
 	}
 
 	if err := container.Provide(f, opts...); err != nil {
-		errs, _ := cli.GetMetadataFromContext(ctx, contextKeyDIProvideErrors).([]error) //nolint:revive // unchecked-type-assertion: we know this type for sure
+		errs, _ := cli.GetMetadataFromContext(ctx, contextKeyDIProvideErrors).([]error) //nolint:revive,errcheck // unchecked-type-assertion: we know this type for sure
 		cli.SetMetadataInContext(ctx, contextKeyDIProvideErrors, append(errs, err))
 	}
 }
 
-// Invoke uses previously provided functions (through AddProvider) to initialize function f.
+// Invoke executes a function (f) using the dig.Container stored in the
+// context. It first checks for any errors that occurred during provider
+// registration and returns them if found. If the container is not found
+// in the context, it returns an error. Otherwise, it invokes the function
+// using the container, handling dependency injection.
 func Invoke(ctx context.Context, f any, opts ...dig.InvokeOption) error {
 	container, exists := cli.GetMetadataFromContext(ctx, contextKeyDIContainer).(*dig.Container)
 	if !exists {
 		return errors.New("container is unset in the context")
 	}
 
-	if errs, _ := cli.GetMetadataFromContext(ctx, contextKeyDIProvideErrors).([]error); len(errs) > 0 { //nolint:revive // unchecked-type-assertion: we know this type for sure
+	if errs, _ := cli.GetMetadataFromContext(ctx, contextKeyDIProvideErrors).([]error); len(errs) > 0 { //nolint:revive,errcheck // unchecked-type-assertion: we know this type for sure
 		return fmt.Errorf("provider error: %v", multierr.Combine(errs...))
 	}
 

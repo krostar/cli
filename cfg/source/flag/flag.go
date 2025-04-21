@@ -12,7 +12,47 @@ import (
 	clicfg "github.com/krostar/cli/cfg"
 )
 
-// Source applies the flag values to the config.
+// Source returns a SourceFunc that applies command-line flag values to a configuration struct.
+//
+// It uses reflection to find fields in the config struct that match the flag destinations
+// and updates them with the flag values. It's designed to work with the context-based flag
+// initialization system in the CLI package.
+//
+// The flagDest parameter is a pointer to the struct instance where flag values are stored.
+// This is usually the same instance that contains the fields used as flag destinations in the
+// command's Flags() and PersistentFlags() methods.
+//
+// The returned SourceFunc can be used in a BeforeCommandExecutionHook to load configuration
+// from command-line flags. It should typically be the last source in the hook to ensure
+// flag values take precedence over other configuration sources.
+//
+// Example:
+//
+//	type Config struct {
+//		LogLevel string
+//		Port     int
+//	}
+//
+//	type MyCommand struct {
+//		config Config
+//	}
+//
+//	func (c *MyCommand) Flags() []cli.Flag {
+//		return []cli.Flag{
+//			cli.NewBuiltinFlag("log-level", "l", &c.config.LogLevel, "Set logging level"),
+//			cli.NewBuiltinFlag("port", "p", &c.config.Port, "Set server port"),
+//		}
+//	}
+//
+//	func (c *MyCommand) Hook() *cli.Hook {
+//		return &cli.Hook{
+//			BeforeCommandExecution: clicfg.BeforeCommandExecutionHook(
+//				&c.config,
+//				// Apply flag values last for highest precedence
+//				sourceflag.Source[Config](&c.config),
+//			),
+//		}
+//	}
 func Source[T any](flagDest *T) clicfg.SourceFunc[T] {
 	return func(ctx context.Context, cfg *T) error {
 		pointersToValuesSetByFlags := make(map[uintptr]struct{})
@@ -40,12 +80,34 @@ func Source[T any](flagDest *T) clicfg.SourceFunc[T] {
 	}
 }
 
+// recursivelyWalkThroughReflectValue recursively traverses two reflect.Values (v1 and v2)
+// and updates fields in v2 with values from v1 based on the pointers in the map.
+//
+// This is an internal helper function that handles the complex task of walking through
+// struct fields, following pointers, and copying values from flag destinations to the
+// corresponding fields in the target configuration.
+//
+// Parameters:
+//   - pointers: A map of memory addresses (as uintptr) for values set by flags.
+//     When a matching field is found and processed, its address is removed from this map.
+//   - v1: The reflect.Value of the flag destination struct containing flag values
+//   - v2: The reflect.Value of the config struct where values should be copied to
+//
+// The function handles three main cases:
+//  1. Pointers: It checks if the pointer itself is in the map, and if not, follows it
+//  2. Structs: It recursively processes each field in the struct
+//  3. Primitive types: It checks if the value's address is in the map, and if so, copies it
+//
+// It returns an error if any occurred during processing, such as an inability to address a value.
+//
+// At the end of successful processing, the pointers map should be empty, indicating that all
+// flag values were successfully transferred to the config struct.
 func recursivelyWalkThroughReflectValue(pointers map[uintptr]struct{}, v1, v2 reflect.Value) error {
 	if len(pointers) == 0 {
 		return nil
 	}
 
-	switch k := v1.Type().Kind(); k { //nolint:exhaustive // all other cases handled in default
+	switch k := v1.Type().Kind(); k {
 	case reflect.Pointer:
 		if v1.IsNil() {
 			return nil

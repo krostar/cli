@@ -11,6 +11,8 @@ import (
 	"github.com/krostar/cli"
 )
 
+// CommandPrint is an example command that prints positional and dashed arguments.
+// It demonstrates the use of flags, argument validation, and error handling.
 type CommandPrint struct {
 	Writer io.Writer
 
@@ -23,10 +25,13 @@ type commandPrintConfig struct {
 	C []string
 }
 
+// Usage returns the usage string for the CommandPrint command,
+// indicating the expected positional and dashed arguments.
 func (cmd *CommandPrint) Usage() string {
 	return "pos args -- dashed args"
 }
 
+// Examples returns a slice of example usage strings for the CommandPrint command.
 func (cmd *CommandPrint) Examples() []string {
 	return []string{
 		"print a",
@@ -35,11 +40,14 @@ func (cmd *CommandPrint) Examples() []string {
 	}
 }
 
+// Description returns a detailed description of the CommandPrint command.
 func (cmd *CommandPrint) Description() string {
 	return "print positional and dashed arguments\n" +
 		"print prints at least one and maximum three arguments, and a unlimited number of dashed arguments"
 }
 
+// Flags returns the command-line flags for the CommandPrint command.
+// It defines flags for 'a', 'b', and 'c' options, using built-in flag types.
 func (cmd *CommandPrint) Flags() []cli.Flag {
 	return []cli.Flag{
 		cli.NewBuiltinFlag("long-a", "a", &cmd.cfg.A, "displayed when 'a' is a parameter"),
@@ -48,6 +56,9 @@ func (cmd *CommandPrint) Flags() []cli.Flag {
 	}
 }
 
+// Execute implements the main logic of the CommandPrint command. It processes
+// positional and dashed arguments, validates the number of arguments, and
+// prints the arguments along with their corresponding flag values (if any).
 func (cmd *CommandPrint) Execute(_ context.Context, args, dashedArgs []string) error {
 	if len(args) == 0 {
 		return cli.NewErrorWithHelp(errors.New("there should be at least 1 arg to print"))

@@ -5,7 +5,7 @@ import (
 	"errors"
 	"testing"
 
-	"gotest.tools/v3/assert"
+	"github.com/krostar/test"
 )
 
 func Test_BeforeCommandExecutionHook(t *testing.T) {
@@ -15,7 +15,7 @@ func Test_BeforeCommandExecutionHook(t *testing.T) {
 	var cfg config
 
 	t.Run("ok", func(t *testing.T) {
-		assert.NilError(t, BeforeCommandExecutionHook(&cfg,
+		test.Require(t, BeforeCommandExecutionHook(&cfg,
 			func(_ context.Context, cfg *config) error {
 				cfg.A += "1"
 				return nil
@@ -28,18 +28,18 @@ func Test_BeforeCommandExecutionHook(t *testing.T) {
 				cfg.A += "3"
 				return nil
 			},
-		)(context.Background()))
+		)(test.Context(t)) == nil)
 
-		assert.Check(t, cfg.A == "123")
+		test.Assert(t, cfg.A == "123")
 	})
 
 	t.Run("error", func(t *testing.T) {
 		expectedErr := errors.New("boom")
 
-		assert.ErrorIs(t, BeforeCommandExecutionHook(&cfg,
+		test.Assert(t, errors.Is(BeforeCommandExecutionHook(&cfg,
 			func(context.Context, *config) error {
 				return expectedErr
 			},
-		)(context.Background()), expectedErr)
+		)(test.Context(t)), expectedErr))
 	})
 }

@@ -1,12 +1,14 @@
 package cli
 
-// ShowHelpError defines a new type of error that defines whenever the error should display the command help before the error message.
+// ShowHelpError is an interface that allows commands to signal whether
+// the help message should be displayed along with the error.
 type ShowHelpError interface {
 	error
 	ShowHelp() bool
 }
 
-// NewErrorWithHelp wraps provided error and tells the CLI to show usage help.
+// NewErrorWithHelp creates a new error that implements the ShowHelpError
+// interface, indicating that the help message should be shown.
 func NewErrorWithHelp(err error) error {
 	return &showHelpError{err: err}
 }
@@ -22,13 +24,15 @@ func (e showHelpError) Error() string {
 	return ""
 }
 
-// ExitStatusError defines a new type of error that allow the customization of the CLI exit status.
+// ExitStatusError allows commands to specify a custom exit
+// status code for the CLI application.
 type ExitStatusError interface {
 	error
 	ExitStatus() uint8
 }
 
-// NewErrorWithExitStatus wraps the provided error and tells the CLI to exit with provided code.
+// NewErrorWithExitStatus creates a new error that implements the
+// ExitStatusError interface, allowing a custom exit status to be set.
 func NewErrorWithExitStatus(err error, status uint8) error {
 	return &exitStatusError{err: err, status: status}
 }

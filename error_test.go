@@ -4,7 +4,7 @@ import (
 	"errors"
 	"testing"
 
-	"gotest.tools/v3/assert"
+	"github.com/krostar/test"
 )
 
 func Test_ErrorWithHelp(t *testing.T) {
@@ -12,21 +12,21 @@ func Test_ErrorWithHelp(t *testing.T) {
 		rootErr := errors.New("boom")
 		helpErr := NewErrorWithHelp(rootErr)
 
-		assert.Check(t, rootErr.Error() == helpErr.Error())
-		assert.ErrorIs(t, helpErr, rootErr)
+		test.Assert(t, rootErr.Error() == helpErr.Error())
+		test.Assert(t, errors.Is(helpErr, rootErr))
 
 		showHelpErr := new(ShowHelpError)
-		assert.Assert(t, errors.As(helpErr, showHelpErr))
-		assert.Check(t, (*showHelpErr).ShowHelp())
+		test.Assert(t, errors.As(helpErr, showHelpErr))
+		test.Assert(t, (*showHelpErr).ShowHelp())
 	})
 
 	t.Run("nil error", func(t *testing.T) {
 		helpErr := NewErrorWithHelp(nil)
-		assert.Check(t, helpErr.Error() == "")
+		test.Assert(t, helpErr.Error() == "")
 
 		showHelpErr := new(ShowHelpError)
-		assert.Assert(t, errors.As(helpErr, showHelpErr))
-		assert.Check(t, (*showHelpErr).ShowHelp())
+		test.Require(t, errors.As(helpErr, showHelpErr))
+		test.Assert(t, (*showHelpErr).ShowHelp())
 	})
 }
 
@@ -35,20 +35,20 @@ func Test_ErrorWithExitStatus(t *testing.T) {
 		rootErr := errors.New("boom")
 		helpErr := NewErrorWithExitStatus(rootErr, 42)
 
-		assert.Check(t, rootErr.Error() == helpErr.Error())
-		assert.ErrorIs(t, helpErr, rootErr)
+		test.Assert(t, rootErr.Error() == helpErr.Error())
+		test.Assert(t, errors.Is(helpErr, rootErr))
 
 		showHelpErr := new(ExitStatusError)
-		assert.Assert(t, errors.As(helpErr, showHelpErr))
-		assert.Check(t, (*showHelpErr).ExitStatus() == uint8(42))
+		test.Require(t, errors.As(helpErr, showHelpErr))
+		test.Assert(t, (*showHelpErr).ExitStatus() == uint8(42))
 	})
 
 	t.Run("nil error", func(t *testing.T) {
 		helpErr := NewErrorWithExitStatus(nil, 42)
-		assert.Check(t, helpErr.Error() == "")
+		test.Assert(t, helpErr.Error() == "")
 
 		showHelpErr := new(ExitStatusError)
-		assert.Assert(t, errors.As(helpErr, showHelpErr))
-		assert.Check(t, (*showHelpErr).ExitStatus() == uint8(42))
+		test.Require(t, errors.As(helpErr, showHelpErr))
+		test.Assert(t, (*showHelpErr).ExitStatus() == uint8(42))
 	})
 }

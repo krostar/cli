@@ -10,11 +10,18 @@ import (
 )
 
 func main() {
-	ctx, cancel := cli.NewContextCancelableBySignal(syscall.SIGINT, syscall.SIGKILL)
+	// create a context that can be canceled by SIGINT and SIGTERM signals
+	ctx, cancel := cli.NewContextCancelableBySignal(syscall.SIGINT, syscall.SIGTERM)
 	defer cancel()
 
-	cli.Exit(ctx, spf13cobra.Execute(ctx, os.Args, cli.
+	// create the CLI with root command and subcommands
+	cmd := cli.
 		New(new(example.CommandRoot)).
-		AddCommand("print", &example.CommandPrint{Writer: os.Stdout}),
-	))
+		AddCommand("print", &example.CommandPrint{Writer: os.Stdout})
+
+	// Execute the CLI with spf13/cobra as the backend
+	err := spf13cobra.Execute(ctx, os.Args, cmd)
+
+	// Handle exit status and error messages
+	cli.Exit(ctx, err)
 }

@@ -2,21 +2,21 @@ package example
 
 import (
 	"bytes"
-	"context"
+	"strings"
 	"testing"
 
-	"gotest.tools/v3/assert"
+	"github.com/krostar/test"
 )
 
 func Test_CommandPrint_Execute(t *testing.T) {
-	ctx := context.Background()
+	ctx := test.Context(t)
 
 	t.Run("ok", func(t *testing.T) {
 		output := new(bytes.Buffer)
 		cmd := &CommandPrint{Writer: output}
 
-		assert.NilError(t, cmd.Execute(ctx, []string{"foo", "bar"}, []string{"foofoo", "barbar"}))
-		assert.Check(t, output.String() == `args[0] = foo
+		test.Require(t, cmd.Execute(ctx, []string{"foo", "bar"}, []string{"foofoo", "barbar"}) == nil)
+		test.Assert(t, output.String() == `args[0] = foo
 args[1] = bar
 dashedArgs[0] = foofoo
 dashedArgs[1] = barbar
@@ -25,7 +25,7 @@ dashedArgs[1] = barbar
 
 	t.Run("ko", func(t *testing.T) {
 		t.Run("bad arguments numbers", func(t *testing.T) {
-			for _, test := range []struct {
+			for _, tt := range []struct {
 				args          []string
 				errorContains string
 			}{
@@ -41,9 +41,8 @@ dashedArgs[1] = barbar
 				},
 			} {
 				cmd := new(CommandPrint)
-
-				err := cmd.Execute(ctx, test.args, nil)
-				assert.ErrorContains(t, err, test.errorContains)
+				err := cmd.Execute(ctx, tt.args, nil)
+				test.Assert(t, err != nil && strings.Contains(err.Error(), tt.errorContains))
 			}
 		})
 	})

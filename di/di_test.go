@@ -1,10 +1,11 @@
 package clidi
 
 import (
-	"context"
+	"strings"
 	"testing"
 
-	"gotest.tools/v3/assert"
+	"github.com/krostar/test"
+	"github.com/krostar/test/check"
 
 	"github.com/krostar/cli"
 )
@@ -18,7 +19,7 @@ func Test_DI(t *testing.T) {
 	t.Run("ok", func(t *testing.T) {
 		called := make(map[string]uint)
 
-		ctx := cli.NewContextWithMetadata(context.Background())
+		ctx := cli.NewContextWithMetadata(test.Context(t))
 
 		InitializeContainer(ctx)
 		AddProvider(ctx, func() fooA { return func() { called["fooA"]++ } })
@@ -29,33 +30,39 @@ func Test_DI(t *testing.T) {
 			}
 		})
 
-		assert.NilError(t, Invoke(ctx, func(b fooB) {
+		test.Require(t, Invoke(ctx, func(b fooB) {
 			b()
 			called["invoked"]++
-		}))
-		assert.DeepEqual(t, called, map[string]uint{"fooA": 1, "fooB": 1, "invoked": 1})
+		}) == nil)
+		test.Assert(check.Compare(t, called, map[string]uint{"fooA": 1, "fooB": 1, "invoked": 1}))
 	})
 
 	t.Run("calling without metadata", func(t *testing.T) {
-		ctx := context.Background()
+		ctx := test.Context(t)
 
 		InitializeContainer(ctx)
 		AddProvider(ctx, func() fooA { return func() {} })
-		assert.Error(t, Invoke(ctx, func(fooA) {}), "container is unset in the context")
+
+		err := Invoke(ctx, func(fooA) {})
+		test.Assert(t, err != nil && strings.Contains(err.Error(), "container is unset in the context"))
 	})
 
 	t.Run("provider error", func(t *testing.T) {
-		ctx := cli.NewContextWithMetadata(context.Background())
+		ctx := cli.NewContextWithMetadata(test.Context(t))
 
 		InitializeContainer(ctx)
 		AddProvider(ctx, nil)
-		assert.ErrorContains(t, Invoke(ctx, func(fooA) {}), "provider error")
+
+		err := Invoke(ctx, func(fooA) {})
+		test.Assert(t, err != nil && strings.Contains(err.Error(), "provider error"))
 	})
 
 	t.Run("invoker error", func(t *testing.T) {
-		ctx := cli.NewContextWithMetadata(context.Background())
+		ctx := cli.NewContextWithMetadata(test.Context(t))
 
 		InitializeContainer(ctx)
-		assert.ErrorContains(t, Invoke(ctx, func(fooA) {}), "invoker error")
+
+		err := Invoke(ctx, func(fooA) {})
+		test.Assert(t, err != nil && strings.Contains(err.Error(), "invoker error"))
 	})
 }

@@ -10,8 +10,7 @@ import (
 	clicfg "github.com/krostar/cli/cfg"
 )
 
-// Source opens the file provided by getFilename() and calls unmarshaler.
-// If allowNonExisting and the file does not exist, Source does not fail.
+// Source returns a SourceFunc that reads a config from a file.
 func Source[T any](getFilename func(cfg T) string, unmarshaler func(reader io.Reader, cfg *T) error, allowNonExisting bool) clicfg.SourceFunc[T] {
 	return func(_ context.Context, cfg *T) error {
 		file, err := os.Open(getFilename(*cfg))
