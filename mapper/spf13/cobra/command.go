@@ -22,13 +22,13 @@ func buildCobraCommandFromCLIRecursively(ctx context.Context, c *cli.CLI) (*cobr
 
 	command, err := buildCobraCommandFromCLICommand(ctx, c.Name, c.Command)
 	if err != nil {
-		return nil, fmt.Errorf("unable to build spf13/cobra command %s: %w", c.Name, err)
+		return nil, fmt.Errorf("unable to build command %s: %w", c.Name, err)
 	}
 
 	for _, subCommand := range c.SubCommands {
 		subCommand, err := buildCobraCommandFromCLIRecursively(ctx, subCommand)
 		if err != nil {
-			return nil, fmt.Errorf("unable to build spf13/cobra sub-command %s of command %s: %w", subCommand.Name(), c.Name, err)
+			return nil, fmt.Errorf("unable to build sub-command %s of command %s: %w", subCommand.Name(), c.Name, err)
 		}
 		command.AddCommand(subCommand)
 	}
