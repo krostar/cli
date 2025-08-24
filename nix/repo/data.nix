@@ -1,6 +1,8 @@
 {lib, ...}: {
+  dev.git-cliff.enable = true;
   ci.testers.go.enable = true;
   ci.linters = {
+    commitlint.enable = true;
     editorconfig-checker.settings.Exclude = ["./double/internal/*_generated*.go"];
     golangci-lint = {
       enable = true;

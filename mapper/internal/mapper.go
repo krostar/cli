@@ -18,6 +18,7 @@ func Context(cmd cli.Command, ctx context.Context) context.Context { //nolint:re
 	if get, ok := cmd.(cli.CommandContext); ok {
 		return get.Context(ctx)
 	}
+
 	return ctx
 }
 
@@ -32,6 +33,7 @@ func ShortDescription(cmd cli.Command) string {
 	if firstLine, err := bufio.NewReader(strings.NewReader(description)).ReadString('\n'); err == nil || errors.Is(err, io.EOF) {
 		return strings.TrimSuffix(firstLine, "\n")
 	}
+
 	return description
 }
 
@@ -43,6 +45,7 @@ func Description(cmd cli.Command) string {
 	if get, ok := cmd.(cli.CommandDescription); ok {
 		return get.Description()
 	}
+
 	return ""
 }
 
@@ -54,6 +57,7 @@ func Examples(cmd cli.Command) []string {
 	if get, ok := cmd.(cli.CommandExamples); ok {
 		return get.Examples()
 	}
+
 	return nil
 }
 
@@ -65,6 +69,7 @@ func Usage(cmd cli.Command) string {
 	if get, ok := cmd.(cli.CommandUsage); ok {
 		return get.Usage()
 	}
+
 	return ""
 }
 
@@ -76,6 +81,7 @@ func Flags(cmd cli.Command) []cli.Flag {
 	if get, ok := cmd.(cli.CommandFlags); ok {
 		return get.Flags()
 	}
+
 	return nil
 }
 
@@ -87,6 +93,7 @@ func PersistentFlags(cmd cli.Command) []cli.Flag {
 	if get, ok := cmd.(cli.CommandPersistentFlags); ok {
 		return get.PersistentFlags()
 	}
+
 	return nil
 }
 

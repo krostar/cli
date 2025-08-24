@@ -48,6 +48,7 @@ type Option func(p *cobra.Command)
 // with a "[CLI]: " prefix, making CLI output clearly identifiable in test logs.
 func ForTest(t test.TestingT) Option {
 	writer := mapper.TestWriter(t)
+
 	return func(p *cobra.Command) {
 		p.SetOut(writer)
 		p.SetErr(writer)

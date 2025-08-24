@@ -21,6 +21,7 @@ import (
 func Source[T any](envPrefix string) clicfg.SourceFunc[T] {
 	return func(_ context.Context, cfg *T) error {
 		_, err := recursivelyWalkThroughReflectValue(os.LookupEnv, reflect.ValueOf(cfg).Elem(), envPrefix, nil)
+
 		return err
 	}
 }
@@ -50,6 +51,7 @@ func recursivelyWalkThroughReflectValue(lookupEnv func(string) (string, bool), v
 		if atLeastOneEnvFound {
 			v.Set(newV)
 		}
+
 		return atLeastOneEnvFound, err
 
 	case reflect.Struct: // if it's a struct, iterate over its fields
@@ -57,6 +59,7 @@ func recursivelyWalkThroughReflectValue(lookupEnv func(string) (string, bool), v
 			errs            []error
 			atLeastOneFound bool
 		)
+
 		for i := range v.NumField() {
 			tfield := t.Field(i)
 			tag := tfield.Tag.Get("env")
@@ -80,12 +83,15 @@ func recursivelyWalkThroughReflectValue(lookupEnv func(string) (string, bool), v
 			if envFound {
 				atLeastOneFound = true
 			}
+
 			errs = append(errs, err)
 		}
+
 		return atLeastOneFound, multierr.Combine(errs...)
 
 	default: // for primitive types, try to find the corresponding environment variable
 		var rawEnv string
+
 		for _, envToLookup := range append(additionalEnvsToLookup, envPrefix) {
 			envToLookup = strings.TrimSpace(envToLookup)
 			if envToLookup != "" {
@@ -105,65 +111,81 @@ func recursivelyWalkThroughReflectValue(lookupEnv func(string) (string, bool), v
 		case reflect.Bool:
 			vv, err := strconv.ParseBool(rawEnv)
 			v.SetBool(vv)
+
 			return true, err
 		case reflect.Int:
 			vv, err := strconv.ParseInt(rawEnv, 10, 0)
 			v.SetInt(vv)
+
 			return true, err
 		case reflect.Int8:
 			vv, err := strconv.ParseInt(rawEnv, 10, 8)
 			v.SetInt(vv)
+
 			return true, err
 		case reflect.Int16:
 			vv, err := strconv.ParseInt(rawEnv, 10, 16)
 			v.SetInt(vv)
+
 			return true, err
 		case reflect.Int32:
 			vv, err := strconv.ParseInt(rawEnv, 10, 32)
 			v.SetInt(vv)
+
 			return true, err
 		case reflect.Int64:
 			vv, err := strconv.ParseInt(rawEnv, 10, 64)
 			v.SetInt(vv)
+
 			return true, err
 		case reflect.Uint:
 			vv, err := strconv.ParseUint(rawEnv, 10, 0)
 			v.SetUint(vv)
+
 			return true, err
 		case reflect.Uint8:
 			vv, err := strconv.ParseUint(rawEnv, 10, 8)
 			v.SetUint(vv)
+
 			return true, err
 		case reflect.Uint16:
 			vv, err := strconv.ParseUint(rawEnv, 10, 16)
 			v.SetUint(vv)
+
 			return true, err
 		case reflect.Uint32:
 			vv, err := strconv.ParseUint(rawEnv, 10, 32)
 			v.SetUint(vv)
+
 			return true, err
 		case reflect.Uint64:
 			vv, err := strconv.ParseUint(rawEnv, 10, 64)
 			v.SetUint(vv)
+
 			return true, err
 		case reflect.Float32:
 			vv, err := strconv.ParseFloat(rawEnv, 32)
 			v.SetFloat(vv)
+
 			return true, err
 		case reflect.Float64:
 			vv, err := strconv.ParseFloat(rawEnv, 64)
 			v.SetFloat(vv)
+
 			return true, err
 		case reflect.Complex64:
 			vv, err := strconv.ParseComplex(rawEnv, 64)
 			v.SetComplex(vv)
+
 			return true, err
 		case reflect.Complex128:
 			vv, err := strconv.ParseComplex(rawEnv, 128)
 			v.SetComplex(vv)
+
 			return true, err
 		case reflect.String:
 			v.SetString(rawEnv)
+
 			return true, nil
 		default:
 			return true, fmt.Errorf("unhandled type %s", k)

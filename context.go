@@ -31,6 +31,7 @@ func getCommandFromContext(ctx context.Context) *ctxCommand {
 	if cmd, ok := ctx.Value(ctxKeyCommand).(*ctxCommand); ok {
 		return cmd
 	}
+
 	return nil
 }
 
@@ -53,6 +54,7 @@ func GetInitializedFlagsFromContext(ctx context.Context) ([]Flag, []Flag) {
 	if cmd, ok := ctx.Value(ctxKeyCommand).(*ctxCommand); ok {
 		return cmd.localFlags, cmd.persistentFlags
 	}
+
 	return nil, nil
 }
 
@@ -79,6 +81,7 @@ func GetMetadataFromContext(ctx context.Context, key any) any {
 	if meta, ok := ctx.Value(ctxKeyMetadata).(ctxMetadata); ok {
 		return meta[key]
 	}
+
 	return nil
 }
 
@@ -100,6 +103,7 @@ func NewContextCancelableBySignal(sig os.Signal, sigs ...os.Signal) (context.Con
 
 	// catch some stop signals, and cancel the context if caught
 	signal.Notify(signalChan, signals...)
+
 	go func() {
 		<-signalChan // block until a signal is received
 		cancel()

@@ -27,9 +27,10 @@ type configWithFlag struct {
 func Test_Source(t *testing.T) {
 	t.Run("ok", func(t *testing.T) {
 		var cfgForFlags configWithFlag
-		src := Source[configWithFlag](&cfgForFlags)
 
+		src := Source[configWithFlag](&cfgForFlags)
 		ctx := cli.NewCommandContext(test.Context(t))
+
 		cli.SetInitializedFlagsInContext(ctx,
 			[]cli.Flag{
 				cli.NewFlag("a", "", cli.NewFlagValuer(&cfgForFlags.C,
@@ -46,6 +47,8 @@ func Test_Source(t *testing.T) {
 								m[split[0]] = ""
 							case 2:
 								m[split[0]] = split[1]
+							default:
+								panic("boom")
 							}
 						}
 
@@ -56,6 +59,7 @@ func Test_Source(t *testing.T) {
 						for key, value := range m {
 							out = append(out, key+":"+value)
 						}
+
 						return strings.Join(out, ",")
 					},
 				), ""),
@@ -99,6 +103,7 @@ func Test_Source(t *testing.T) {
 		}
 
 		var cfgForFlags simpleNestedConfig
+
 		ctx := cli.NewCommandContext(test.Context(t))
 		cli.SetInitializedFlagsInContext(ctx,
 			[]cli.Flag{
@@ -128,6 +133,7 @@ func Test_Source(t *testing.T) {
 
 	t.Run("no flags in command", func(t *testing.T) {
 		var cfgForFlags configWithFlag
+
 		src := Source[configWithFlag](&cfgForFlags)
 
 		test.Assert(t, src(test.Context(t), new(configWithFlag)) == nil)
@@ -135,6 +141,7 @@ func Test_Source(t *testing.T) {
 
 	t.Run("no flags set", func(t *testing.T) {
 		var cfgForFlags configWithFlag
+
 		src := Source[configWithFlag](&cfgForFlags)
 
 		ctx := cli.NewCommandContext(test.Context(t))

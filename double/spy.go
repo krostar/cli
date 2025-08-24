@@ -75,6 +75,7 @@ func (spy *Spy) DebugMethods(t test.TestingT) {
 		for _, cmd := range tree {
 			cmdPath = append(cmdPath, cmd.Name)
 		}
+
 		t.Logf("[%s] %s called", strings.Join(cmdPath, "."), record.Method)
 	})
 }
@@ -91,6 +92,7 @@ func (spy *Spy) ForEachCommandRecords(cb func(tree []*cli.CLI, record SpyCommand
 		if !ok {
 			panic("expected SpyCommandRecord")
 		}
+
 		cb(spy.commands[elem], record)
 	}
 }
@@ -121,11 +123,13 @@ func (*Spy) cmdPathMatchTree(cmdPath []string, tree []*cli.CLI) bool {
 	}
 
 	match := true
+
 	for i, name := range cmdPath {
 		if tree[i].Name != name {
 			match = false
 			break
 		}
 	}
+
 	return match
 }

@@ -63,6 +63,7 @@ func Source[T any](flagDest *T) clicfg.SourceFunc[T] {
 					pointersToValuesSetByFlags[uintptr(reflect.ValueOf(flag.Destination()).UnsafePointer())] = struct{}{}
 				}
 			}
+
 			if len(pointersToValuesSetByFlags) == 0 {
 				return nil
 			}
@@ -120,6 +121,7 @@ func recursivelyWalkThroughReflectValue(pointers map[uintptr]struct{}, v1, v2 re
 
 		v2.Set(v1)
 		delete(pointers, v1ptr)
+
 		return nil
 
 	case reflect.Struct:
@@ -127,6 +129,7 @@ func recursivelyWalkThroughReflectValue(pointers map[uintptr]struct{}, v1, v2 re
 		for i := range v1.NumField() {
 			errs = append(errs, recursivelyWalkThroughReflectValue(pointers, v1.Field(i), v2.Field(i)))
 		}
+
 		return multierr.Combine(errs...)
 
 	default:
@@ -141,6 +144,7 @@ func recursivelyWalkThroughReflectValue(pointers map[uintptr]struct{}, v1, v2 re
 
 		v2.Set(v1)
 		delete(pointers, v1ptr)
+
 		return nil
 	}
 }

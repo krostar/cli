@@ -28,12 +28,14 @@ func NewBuiltinPointerFlag[T builtins](longName, shortName string, destination *
 				if err != nil {
 					return nil, err
 				}
+
 				return &b, nil
 			},
 			func(t *T) string {
 				if t != nil {
 					return builtinToString[T](*t)
 				}
+
 				return "<nil>"
 			},
 		), description,
@@ -67,6 +69,7 @@ func NewBuiltinSliceFlag[T builtins](longName, shortName string, destination *[]
 				for i, value := range values {
 					valuesRepr[i] = builtinToString(value)
 				}
+
 				return "[" + strings.Join(valuesRepr, ",") + "]"
 			},
 		), description,

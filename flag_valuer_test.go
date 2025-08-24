@@ -41,6 +41,7 @@ func Test_NewFlagValuer(t *testing.T) {
 			if strings.Contains(reason.(string), "destination is nil") {
 				return nil
 			}
+
 			return errors.New("expected different panic reason")
 		}))
 
@@ -50,6 +51,7 @@ func Test_NewFlagValuer(t *testing.T) {
 			if strings.Contains(reason.(string), "parse is nil") {
 				return nil
 			}
+
 			return errors.New("expected different panic reason")
 		}))
 
@@ -59,6 +61,7 @@ func Test_NewFlagValuer(t *testing.T) {
 			if strings.Contains(reason.(string), "toString is nil") {
 				return nil
 			}
+
 			return errors.New("expected different panic reason")
 		}))
 	})
@@ -93,6 +96,7 @@ func Test_NewStringerFlagValuer(t *testing.T) {
 			if strings.Contains(reason.(string), "destination is nil") {
 				return nil
 			}
+
 			return errors.New("expected different panic reason")
 		}))
 
@@ -102,6 +106,7 @@ func Test_NewStringerFlagValuer(t *testing.T) {
 			if strings.Contains(reason.(string), "parse is nil") {
 				return nil
 			}
+
 			return errors.New("expected different panic reason")
 		}))
 	})

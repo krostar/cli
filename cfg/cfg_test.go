@@ -12,6 +12,7 @@ func Test_BeforeCommandExecutionHook(t *testing.T) {
 	type config struct {
 		A string
 	}
+
 	var cfg config
 
 	t.Run("ok", func(t *testing.T) {

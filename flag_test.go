@@ -11,6 +11,7 @@ import (
 
 func Test_NewFlag(t *testing.T) {
 	var dest int
+
 	nonNilValuer := &flagValuer[int]{value: &dest}
 
 	t.Run("ok", func(t *testing.T) {
@@ -28,6 +29,7 @@ func Test_NewFlag(t *testing.T) {
 				if strings.Contains(reason.(string), "longName and/or shortName must be non-empty") {
 					return nil
 				}
+
 				return errors.New("expected different panic reason")
 			}))
 		})
@@ -39,6 +41,7 @@ func Test_NewFlag(t *testing.T) {
 				if strings.Contains(reason.(string), "shortName must be one character long") {
 					return nil
 				}
+
 				return errors.New("expected different panic reason")
 			}))
 		})
@@ -50,6 +53,7 @@ func Test_NewFlag(t *testing.T) {
 				if strings.Contains(reason.(string), "a non-nil valuer is required") {
 					return nil
 				}
+
 				return errors.New("expected different panic reason")
 			}))
 		})

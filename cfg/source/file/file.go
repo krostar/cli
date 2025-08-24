@@ -18,9 +18,10 @@ func Source[T any](getFilename func(cfg T) string, unmarshaler func(reader io.Re
 			if errors.Is(err, os.ErrNotExist) && allowNonExisting {
 				return nil
 			}
+
 			return fmt.Errorf("unable to open config file: %w", err)
 		}
-		defer file.Close() //nolint:errcheck // standard library don't care about this error
+		defer file.Close()
 
 		if err := unmarshaler(file, cfg); err != nil {
 			return fmt.Errorf("unable to decode config: %w", err)

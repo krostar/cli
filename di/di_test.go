@@ -26,12 +26,14 @@ func Test_DI(t *testing.T) {
 		AddProvider(ctx, func(a fooA) fooB {
 			return func() {
 				a()
+
 				called["fooB"]++
 			}
 		})
 
 		test.Require(t, Invoke(ctx, func(b fooB) {
 			b()
+
 			called["invoked"]++
 		}) == nil)
 		test.Assert(check.Compare(t, called, map[string]uint{"fooA": 1, "fooB": 1, "invoked": 1}))

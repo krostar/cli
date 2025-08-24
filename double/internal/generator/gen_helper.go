@@ -43,6 +43,7 @@ func getTupleRepresentation(params *types.Tuple, imports map[string]string, nbVa
 // Adapted from: https://github.com/mxschmitt/golang-combinations/blob/main/combinations.go
 func generateCombinations[T any](set []T) [][]T {
 	var combinations [][]T
+
 	length := uint(len(set))
 
 	// Go through all possible combinations of objects
@@ -55,6 +56,7 @@ func generateCombinations[T any](set []T) [][]T {
 				subset = append(subset, set[object])
 			}
 		}
+
 		combinations = append(combinations, subset)
 	}
 
@@ -71,6 +73,7 @@ func fillUsedImports(t types.Type, imports map[string]string) {
 	case *types.Named: // for named types, add the package to imports if it exists
 		obj := t.Obj()
 		pkg := obj.Pkg()
+
 		if pkg != nil && pkg.Path() != "" {
 			imports[pkg.Path()] = pkg.Name()
 		}
@@ -103,6 +106,7 @@ func fillUsedImports(t types.Type, imports map[string]string) {
 		for i := range params.Len() {
 			fillUsedImports(params.At(i).Type(), imports)
 		}
+
 		results := t.Results()
 		for i := range results.Len() {
 			fillUsedImports(results.At(i).Type(), imports)

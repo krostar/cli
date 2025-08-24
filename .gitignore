@@ -1,5 +1,6 @@
 /.direnv
 /result
+testdata/fuzz/
 
 # nixago: ignore-linked-files
 /.editorconfig

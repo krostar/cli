@@ -71,6 +71,7 @@ func Test_NewContextCancelableBySignal(t *testing.T) {
 	t.Run("sending provided signal cancels the context", func(t *testing.T) {
 		ctx, cancel := NewContextCancelableBySignal(syscall.SIGUSR1)
 		defer cancel()
+
 		test.Assert(t, ctx.Err() == nil)
 		test.Assert(t, syscall.Kill(syscall.Getpid(), syscall.SIGUSR1) == nil)
 		<-ctx.Done()
@@ -80,6 +81,7 @@ func Test_NewContextCancelableBySignal(t *testing.T) {
 	t.Run("sending unknown signal keeps context intact", func(t *testing.T) {
 		ctx, cancel := NewContextCancelableBySignal(syscall.SIGUSR1)
 		defer cancel()
+
 		test.Assert(t, ctx.Err() == nil)
 		test.Assert(t, syscall.Kill(syscall.Getpid(), syscall.SIGUSR2) == nil)
 		test.Assert(t, ctx.Err() == nil)

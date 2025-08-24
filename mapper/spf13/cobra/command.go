@@ -30,6 +30,7 @@ func buildCobraCommandFromCLIRecursively(ctx context.Context, c *cli.CLI) (*cobr
 		if err != nil {
 			return nil, fmt.Errorf("unable to build sub-command %s of command %s: %w", subCommand.Name, c.Name, err)
 		}
+
 		command.AddCommand(sub)
 	}
 
@@ -123,6 +124,7 @@ func setCobraHooksFromCLIHooks(ctx context.Context, c *cobra.Command, hook *cli.
 				return err
 			}
 		}
+
 		return persistentHook.BeforeCommandExecution(ctx)
 	}
 

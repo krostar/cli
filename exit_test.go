@@ -13,6 +13,7 @@ import (
 
 type bufferThatCloses struct {
 	bytes.Buffer
+
 	closed bool
 }
 

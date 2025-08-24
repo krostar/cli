@@ -85,5 +85,6 @@ func getExitLoggerFromMetadata(ctx context.Context) io.WriteCloser {
 	if writer, ok := rawWriter.(io.WriteCloser); ok {
 		return writer
 	}
+
 	return os.Stderr
 }

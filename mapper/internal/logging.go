@@ -37,9 +37,11 @@ type writerWithPrefix struct {
 
 func (pw *writerWithPrefix) Write(p []byte) (int, error) {
 	pw.t.Helper()
+
 	w, err := pw.w.Write(append(pw.prefix, p...))
 	if w > len(p) {
 		w = len(p)
 	}
+
 	return w, err
 }

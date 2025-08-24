@@ -103,5 +103,6 @@ func (cli *CLI) Mount(name string, sub *CLI) *CLI {
 	mount := *sub
 	mount.Name = name
 	cli.SubCommands = append(cli.SubCommands, &mount)
+
 	return cli
 }

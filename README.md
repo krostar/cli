@@ -22,6 +22,10 @@ Changing frameworks can require extensive rewrites.
 - **Flexibility**: Allowing you to choose (and change) the underlying CLI framework that best suits your needs.
 - **Simplicity**: Focusing on core CLI functionality, avoiding unnecessary complexity.
 
+## API Stability
+
+This project follows [Semantic Versioning](https://semver.org/).
+
 ## Usage
 
 ### Basic Command

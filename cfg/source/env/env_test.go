@@ -174,12 +174,14 @@ func Test_Source(t *testing.T) {
 		}
 
 		type foo1 struct {
-			bar   `env:"notbar"`
+			bar `env:"notbar"`
+
 			Hello string
 		}
 
 		type foo2 struct {
-			bar   `env:"^"`
+			bar `env:"^"`
+
 			Hello string
 		}
 

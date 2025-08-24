@@ -98,6 +98,7 @@ func Test_Spy_AssertCommandRecords(t *testing.T) {
 			test.Assert(t, records[0].Method == "Description")
 			test.Assert(t, records[1].Method == "Description")
 			test.Assert(t, records[2].Method == "Usage")
+
 			return nil
 		})
 		spiedT.ExpectTestToPass(t)

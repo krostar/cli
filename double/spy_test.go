@@ -58,6 +58,7 @@ func Test_Spy_ForEachCommandRecords(t *testing.T) {
 	cmd.(cli.CommandUsage).Usage()
 
 	var recordedMethods []string
+
 	spy.ForEachCommandRecords(func(_ []*cli.CLI, record SpyCommandRecord) {
 		recordedMethods = append(recordedMethods, record.Method)
 	})

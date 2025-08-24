@@ -22,6 +22,7 @@ func Test_Source(t *testing.T) {
 		configFile, err := os.CreateTemp(t.TempDir(), "*.yaml")
 		test.Require(t, err == nil)
 		t.Cleanup(func() { _ = os.Remove(configFile.Name()) })
+
 		_, _ = configFile.WriteString(`
 awesome: avalue
 `)
@@ -33,6 +34,7 @@ awesome: avalue
 			func(r io.Reader, cfg *configWithFile) error {
 				decoder := yaml.NewDecoder(r)
 				decoder.KnownFields(true)
+
 				return decoder.Decode(&cfg)
 			},
 			false,

@@ -15,6 +15,7 @@ func Source[T any]() clicfg.SourceFunc[T] {
 		}); ok {
 			cfgDefault.SetDefault()
 		}
+
 		return nil
 	}
 }

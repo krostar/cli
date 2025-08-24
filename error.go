@@ -21,6 +21,7 @@ func (e showHelpError) Error() string {
 	if e.err != nil {
 		return e.err.Error()
 	}
+
 	return ""
 }
 
@@ -48,5 +49,6 @@ func (e exitStatusError) Error() string {
 	if e.err != nil {
 		return e.err.Error()
 	}
+
 	return ""
 }

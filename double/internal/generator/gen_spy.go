@@ -1,6 +1,7 @@
 package main
 
 import (
+	"context"
 	"fmt"
 	"go/types"
 	"maps"
@@ -25,7 +26,7 @@ type templateSpyDataMethod struct {
 	OutputTypes    []string
 }
 
-func generateSpyImplementation(mainCommandInterface *types.Interface, otherCommandInterfaces map[string]*types.Interface, destFilePath string) error {
+func generateSpyImplementation(ctx context.Context, mainCommandInterface *types.Interface, otherCommandInterfaces map[string]*types.Interface, destFilePath string) error {
 	mainCommandName := "Command"
 	tmpl := template.Must(template.New("spy").Funcs(template.FuncMap{
 		"strjoin": strings.Join,
@@ -104,7 +105,7 @@ func (spy *spyAllInterfaces) {{ $method.Name }}({{ strjoin $method.InputVarsType
 		return fmt.Errorf("unable to execute template: %w", err)
 	}
 
-	if err := exec.Command("just", "fmt", destFilePath).Run(); err != nil {
+	if err := exec.CommandContext(ctx, "just", "fmt", destFilePath).Run(); err != nil {
 		return fmt.Errorf("unable to format output: %w", err)
 	}
 

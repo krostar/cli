@@ -49,6 +49,7 @@ func BeforeCommandExecutionHook[T any](dest *T, source SourceFunc[T], sources ..
 		}
 
 		*dest = *cfg
+
 		return nil
 	}
 }

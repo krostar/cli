@@ -1,6 +1,7 @@
 package main
 
 import (
+	"context"
 	"fmt"
 	"go/ast"
 	"go/importer"
@@ -16,7 +17,10 @@ func main() {
 	if len(os.Args) != 2 {
 		panic(fmt.Sprintf("usage: %s (path to cli sources)", os.Args[0]))
 	}
+
 	cliPath := os.Args[1]
+
+	ctx := context.Background()
 
 	command, others, err := findCommandInterfaces(cliPath)
 	if err != nil {
@@ -24,19 +28,20 @@ func main() {
 	}
 
 	{
-		if err := generateInterfaceWrappedImplementation(command, others, filepath.Join(cliPath, "double", "wrapper_generated.go")); err != nil {
+		if err := generateInterfaceWrappedImplementation(ctx, command, others, filepath.Join(cliPath, "double", "wrapper_generated.go")); err != nil {
 			panic(fmt.Errorf("failed to generate wrapper: %v", err))
 		}
-		if err := generateInterfaceWrappedTestImplementation(command, others, filepath.Join(cliPath, "double", "wrapper_generated_test.go")); err != nil {
+
+		if err := generateInterfaceWrappedTestImplementation(ctx, command, others, filepath.Join(cliPath, "double", "wrapper_generated_test.go")); err != nil {
 			panic(fmt.Errorf("failed to generate wrapper tests: %v", err))
 		}
 	}
 
-	if err := generateFakeImplementation(command, others, filepath.Join(cliPath, "double", "fake_generated.go")); err != nil {
+	if err := generateFakeImplementation(ctx, command, others, filepath.Join(cliPath, "double", "fake_generated.go")); err != nil {
 		panic(fmt.Errorf("failed to generate fake: %v", err))
 	}
 
-	if err := generateSpyImplementation(command, others, filepath.Join(cliPath, "double", "spy_generated.go")); err != nil {
+	if err := generateSpyImplementation(ctx, command, others, filepath.Join(cliPath, "double", "spy_generated.go")); err != nil {
 		panic(fmt.Errorf("failed to generate spy: %v", err))
 	}
 }
@@ -48,12 +53,14 @@ func parseDirFiles(fset *token.FileSet, dir string) ([]*ast.File, error) {
 	}
 
 	var files []*ast.File
+
 	for _, f := range list {
 		if !f.IsDir() && strings.HasSuffix(f.Name(), ".go") && !strings.HasSuffix(f.Name(), "_test.go") {
 			file, err := parser.ParseFile(fset, filepath.Join(dir, f.Name()), nil, parser.SkipObjectResolution)
 			if err != nil {
 				return nil, fmt.Errorf("unable to parse file: %w", err)
 			}
+
 			files = append(files, file)
 		}
 	}
@@ -81,6 +88,7 @@ func findCommandInterfaces(dir string) (*types.Interface, map[string]*types.Inte
 	}
 
 	var commandInterface *types.Interface
+
 	otherInterfaces := make(map[string]*types.Interface)
 
 	for _, name := range pkg.Scope().Names() {
