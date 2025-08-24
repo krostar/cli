@@ -4,6 +4,7 @@ import (
 	"strings"
 	"testing"
 
+	gocmpopts "github.com/google/go-cmp/cmp/cmpopts"
 	"github.com/krostar/test"
 	"github.com/krostar/test/check"
 )
@@ -101,7 +102,8 @@ func Test_Source(t *testing.T) {
 			},
 		}
 
-		test.Require(t, Source[configWithEnv]("CUSTOMTESTENV")(test.Context(t), &cfg) == nil)
+		err := Source[configWithEnv]("CUSTOMTESTENV")(test.Context(t), &cfg)
+		test.Require(t, err == nil, err)
 		test.Assert(check.Compare(t, cfg, configWithEnv{
 			A: "A",
 			B: &struct {
@@ -155,6 +157,55 @@ func Test_Source(t *testing.T) {
 			},
 			E: nil,
 		}))
+	})
+
+	t.Run("embedded without squashing", func(t *testing.T) {
+		for key, value := range map[string]string{
+			"CUSTOMTESTENV_FOO1_HELLO":        "value1",
+			"CUSTOMTESTENV_FOO1_NOTBAR_WORLD": "value2",
+			"CUSTOMTESTENV_FOO2_HELLO":        "value3",
+			"CUSTOMTESTENV_FOO2_WORLD":        "value4",
+		} {
+			t.Setenv(key, value)
+		}
+
+		type bar struct {
+			World string
+		}
+
+		type foo1 struct {
+			bar   `env:"notbar"`
+			Hello string
+		}
+
+		type foo2 struct {
+			bar   `env:"^"`
+			Hello string
+		}
+
+		type configWithEmbedded struct {
+			foo1
+			foo2
+		}
+
+		var cfg configWithEmbedded
+
+		err := Source[configWithEmbedded]("CUSTOMTESTENV")(test.Context(t), &cfg)
+		test.Require(t, err == nil, err)
+		test.Assert(check.Compare(t, cfg, configWithEmbedded{
+			foo1: foo1{
+				bar: bar{
+					World: "val2ue2",
+				},
+				Hello: "val2ue1",
+			},
+			foo2: foo2{
+				bar: bar{
+					World: "val2ue4",
+				},
+				Hello: "value23",
+			},
+		}, gocmpopts.IgnoreUnexported(configWithEmbedded{}, foo1{}, foo2{})))
 	})
 
 	t.Run("unhandled type", func(t *testing.T) {

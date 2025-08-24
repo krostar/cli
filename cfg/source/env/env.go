@@ -61,13 +61,22 @@ func recursivelyWalkThroughReflectValue(lookupEnv func(string) (string, bool), v
 			tfield := t.Field(i)
 			tag := tfield.Tag.Get("env")
 
-			// skip unexported fields and fields with `env:"-"`
-			if tfield.PkgPath != "" || tag == "-" {
+			embededStruct := tfield.Anonymous && tfield.Type.Kind() == reflect.Struct
+			unexported := tfield.PkgPath != ""
+			skipped := tag == "-"
+
+			// skip unexported fields that are not embedded structs, and fields with `env:"-"`
+			if skipped || (unexported && !embededStruct) {
 				continue
 			}
 
+			newEnvPrefix := envPrefix + "_" + strings.ToUpper(tfield.Name)
+			if embededStruct && tag == "^" {
+				newEnvPrefix = envPrefix
+			}
+
 			// recursively process each field, constructing the environment variable name
-			envFound, err := recursivelyWalkThroughReflectValue(lookupEnv, v.Field(i), envPrefix+"_"+strings.ToUpper(tfield.Name), strings.Split(tag, ","))
+			envFound, err := recursivelyWalkThroughReflectValue(lookupEnv, v.Field(i), newEnvPrefix, strings.Split(tag, ","))
 			if envFound {
 				atLeastOneFound = true
 			}
@@ -80,7 +89,7 @@ func recursivelyWalkThroughReflectValue(lookupEnv func(string) (string, bool), v
 		for _, envToLookup := range append(additionalEnvsToLookup, envPrefix) {
 			envToLookup = strings.TrimSpace(envToLookup)
 			if envToLookup != "" {
-				if env, isset := lookupEnv(envToLookup); isset {
+				if env, isset := lookupEnv(SanitizeName(envToLookup)); isset {
 					rawEnv = env
 					break
 				}
