@@ -73,7 +73,7 @@ func Source[T any](flagDest *T) clicfg.SourceFunc[T] {
 		}
 
 		if len(pointersToValuesSetByFlags) != 0 {
-			return errors.New("some values where not find, make sure flag values all points to config")
+			return errors.New("some values where not found, make sure flag values all points to config")
 		}
 
 		return nil

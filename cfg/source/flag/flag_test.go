@@ -164,7 +164,7 @@ func Test_Source(t *testing.T) {
 		test.Assert(t, flagsPersistent[0].FromString("42") == nil)
 
 		err := src(ctx, new(configWithFlag))
-		test.Assert(t, err != nil && strings.Contains(err.Error(), "some values where not find, make sure flag values all points to config"))
+		test.Assert(t, err != nil && strings.Contains(err.Error(), "some values where not found, make sure flag values all points to config"))
 	})
 }
 
