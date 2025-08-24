@@ -5,6 +5,7 @@ import (
 	"errors"
 	"fmt"
 	"reflect"
+	"unsafe"
 
 	"github.com/krostar/cli"
 	clicfg "github.com/krostar/cli/cfg"
@@ -101,7 +102,7 @@ func Source[T any](flagDest *T) clicfg.SourceFunc[T] {
 //
 // At the end of successful processing, the pointers map should be empty, indicating that all
 // flag values were successfully transferred to the config struct.
-func recursivelyWalkThroughReflectValue(pointers map[uintptr]struct{}, v1, v2 reflect.Value) error {
+func recursivelyWalkThroughReflectValue(pointers map[uintptr]struct{}, v1, v2 reflect.Value, applyWOs ...func() error) error {
 	if len(pointers) == 0 {
 		return nil
 	}
@@ -114,18 +115,27 @@ func recursivelyWalkThroughReflectValue(pointers map[uintptr]struct{}, v1, v2 re
 
 		v1ptr := uintptr(v1.Addr().UnsafePointer())
 		if _, ok := pointers[v1ptr]; !ok {
-			return recursivelyWalkThroughReflectValue(pointers, v1.Elem(), v2.Elem())
+			var applyWO func() error
+
+			v2, applyWO = ensurePointerInitialized(v2)
+			applyWOs = append(applyWOs, applyWO)
+
+			return recursivelyWalkThroughReflectValue(pointers, v1.Elem(), v2.Elem(), applyWOs...)
 		}
 
 		v2.Set(v1)
 		delete(pointers, v1ptr)
+
+		if err := applyAllWritingOperations(applyWOs); err != nil {
+			return fmt.Errorf("unable to apply all writing operations: %v", err)
+		}
 
 		return nil
 
 	case reflect.Struct:
 		var errs []error
 		for i := range v1.NumField() {
-			errs = append(errs, recursivelyWalkThroughReflectValue(pointers, v1.Field(i), v2.Field(i)))
+			errs = append(errs, recursivelyWalkThroughReflectValue(pointers, v1.Field(i), v2.Field(i), applyWOs...))
 		}
 
 		return errors.Join(errs...)
@@ -143,6 +153,57 @@ func recursivelyWalkThroughReflectValue(pointers map[uintptr]struct{}, v1, v2 re
 		v2.Set(v1)
 		delete(pointers, v1ptr)
 
+		if err := applyAllWritingOperations(applyWOs); err != nil {
+			return fmt.Errorf("unable to apply all writing operations: %v", err)
+		}
+
 		return nil
 	}
+}
+
+func ensurePointerInitialized(v reflect.Value) (reflect.Value, func() error) {
+	if !v.IsNil() {
+		return v, func() error { return nil }
+	}
+
+	oldV := v
+	newV := reflect.New(v.Type().Elem())
+
+	return newV, func() error {
+		return reflectSetValue(oldV, newV)
+	}
+}
+
+func reflectSetValue(dst, src reflect.Value) error {
+	if !dst.IsValid() || !src.IsValid() {
+		return fmt.Errorf("invalid value: dst.IsValid=%v src.IsValid=%v", dst.IsValid(), src.IsValid())
+	}
+
+	if dst.Type() != src.Type() {
+		return fmt.Errorf("type mismatch: %v != %v", dst.Type(), src.Type())
+	}
+
+	if dst.CanSet() {
+		dst.Set(src)
+		return nil
+	}
+
+	if !dst.CanAddr() {
+		return fmt.Errorf("dst is not addressable; type=%v", dst.Type())
+	}
+
+	dst = reflect.NewAt(dst.Type(), unsafe.Pointer(dst.UnsafeAddr())).Elem()
+	dst.Set(src)
+
+	return nil
+}
+
+func applyAllWritingOperations(wo []func() error) error {
+	for i := range wo {
+		if err := wo[len(wo)-1-i](); err != nil {
+			return err
+		}
+	}
+
+	return nil
 }

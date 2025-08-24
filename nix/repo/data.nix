@@ -16,9 +16,14 @@
               text = "import 'reflect' is not allowed";
             }
             {
+              path = "cfg/source/flag/flag.go";
+              linters = ["gosec"];
+              text = "Use of unsafe calls should be audited";
+            }
+            {
               path = "double/internal/generator/";
-              linters = ["errcheck" "gosec" "goconst"];
-              text = "Error return value of `file.Close` is not checked|Potential file inclusion via variable|make it a constant";
+              linters = ["gosec" "goconst"];
+              text = "Potential file inclusion via variable|make it a constant";
             }
           ];
         };

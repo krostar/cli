@@ -1,6 +1,7 @@
 package sourceflag
 
 import (
+	"reflect"
 	"strings"
 	"testing"
 
@@ -173,6 +174,138 @@ func Test_Source(t *testing.T) {
 		err := src(ctx, new(configWithFlag))
 		test.Assert(t, err != nil && strings.Contains(err.Error(), "some values where not found, make sure flag values all points to config"))
 	})
+
+	t.Run("handling embedding results in cfg", func(t *testing.T) {
+		type (
+			simple   struct{ Bar string }
+			embedded struct{ *simple }
+		)
+
+		var cfgForFlags simple
+
+		ctx := cli.NewCommandContext(test.Context(t))
+		cli.SetInitializedFlagsInContext(ctx, []cli.Flag{cli.NewBuiltinFlag("bar", "", &cfgForFlags.Bar, "")}, nil)
+
+		flagsLocal, flagsPersistent := cli.GetInitializedFlagsFromContext(ctx)
+		test.Require(t, len(flagsLocal) == 1 && len(flagsPersistent) == 0)
+		test.Assert(t, flagsLocal[0].FromString("bar") == nil)
+
+		var cfg embedded
+		test.Require(t, Source(&embedded{simple: &cfgForFlags})(ctx, &cfg) == nil)
+		test.Assert(t, cfg.simple != nil && cfg.Bar == "bar")
+	})
+}
+
+func Test_ensurePointerInitialized(t *testing.T) {
+	for name, tc := range map[string]struct {
+		setup       func() reflect.Value
+		expectValue func(t *testing.T, applyWO func() error, o, v reflect.Value) (test.TestingT, bool)
+	}{
+		"non-nil pointer": {
+			setup: func() reflect.Value {
+				v := &struct{ Field int }{Field: 42}
+				return reflect.ValueOf(&v).Elem()
+			},
+			expectValue: func(t *testing.T, _ func() error, o, v reflect.Value) (test.TestingT, bool) {
+				a := v.IsValid() && !v.IsNil()
+				b := o.Addr().Pointer() == v.Addr().Pointer()
+				return t, a && b
+			},
+		},
+		"nil pointer": {
+			setup: func() reflect.Value {
+				var v *struct{ Field int }
+				return reflect.ValueOf(&v).Elem()
+			},
+			expectValue: func(t *testing.T, applyWO func() error, o, v reflect.Value) (test.TestingT, bool) {
+				a := o.IsNil()
+				b := v.IsValid() && !v.IsNil()
+				err := applyWO()
+				c := !o.IsNil()
+				d := o.Pointer() == v.Pointer()
+				return t, a && b && err == nil && c && d
+			},
+		},
+	} {
+		t.Run(name, func(t *testing.T) {
+			original := tc.setup()
+			result, applyWO := ensurePointerInitialized(original)
+			test.Assert(tc.expectValue(t, applyWO, original, result))
+		})
+	}
+}
+
+func Test_reflectSetValue(t *testing.T) {
+	for name, tc := range map[string]struct {
+		setup              func() (reflect.Value, reflect.Value)
+		unsafe             bool
+		expectValue        func(t *testing.T, dst, src reflect.Value) (test.TestingT, bool)
+		expectErrorMessage string
+	}{
+		"invalid dst": {
+			setup: func() (reflect.Value, reflect.Value) {
+				return reflect.Value{}, reflect.ValueOf(42)
+			},
+			expectErrorMessage: "invalid value: dst.IsValid=false",
+		},
+		"invalid src": {
+			setup: func() (reflect.Value, reflect.Value) {
+				var v int
+				return reflect.ValueOf(&v).Elem(), reflect.Value{}
+			},
+			expectErrorMessage: "invalid value: dst.IsValid=true src.IsValid=false",
+		},
+		"type mismatch": {
+			setup: func() (reflect.Value, reflect.Value) {
+				var dst int
+				src := "string"
+				return reflect.ValueOf(&dst).Elem(), reflect.ValueOf(src)
+			},
+			expectErrorMessage: "type mismatch",
+		},
+		"can set": {
+			setup: func() (reflect.Value, reflect.Value) {
+				var dst int
+				src := 42
+				return reflect.ValueOf(&dst).Elem(), reflect.ValueOf(src)
+			},
+			expectValue: func(t *testing.T, dst, _ reflect.Value) (test.TestingT, bool) {
+				return t, dst.Int() == 42
+			},
+		},
+		"can set with unsafe": {
+			setup: func() (reflect.Value, reflect.Value) {
+				s := struct{ field int }{}
+				src := 42
+				return reflect.ValueOf(&s).Elem().FieldByName("field"), reflect.ValueOf(src)
+			},
+			unsafe: true,
+			expectValue: func(t *testing.T, dst, _ reflect.Value) (test.TestingT, bool) {
+				return t, dst.Int() == 42
+			},
+		},
+		"not addressable": {
+			setup: func() (reflect.Value, reflect.Value) {
+				s := struct{ Field int }{}
+				src := 42
+				field := reflect.ValueOf(s).FieldByName("Field")
+				return field, reflect.ValueOf(src)
+			},
+			expectErrorMessage: "dst is not addressable",
+		},
+	} {
+		t.Run(name, func(t *testing.T) {
+			dst, src := tc.setup()
+
+			err := reflectSetValue(dst, src)
+			if tc.expectErrorMessage != "" {
+				test.Require(t, err != nil && strings.Contains(err.Error(), tc.expectErrorMessage), err)
+			} else {
+				test.Require(t, err == nil, err)
+				test.Assert(tc.expectValue(t, dst, src))
+			}
+		})
+	}
 }
 
 func ptrTo[T any](v T) *T { return &v }
