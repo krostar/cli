@@ -26,11 +26,11 @@ func buildCobraCommandFromCLIRecursively(ctx context.Context, c *cli.CLI) (*cobr
 	}
 
 	for _, subCommand := range c.SubCommands {
-		subCommand, err := buildCobraCommandFromCLIRecursively(ctx, subCommand)
+		sub, err := buildCobraCommandFromCLIRecursively(ctx, subCommand)
 		if err != nil {
-			return nil, fmt.Errorf("unable to build sub-command %s of command %s: %w", subCommand.Name(), c.Name, err)
+			return nil, fmt.Errorf("unable to build sub-command %s of command %s: %w", subCommand.Name, c.Name, err)
 		}
-		command.AddCommand(subCommand)
+		command.AddCommand(sub)
 	}
 
 	return command, nil
