@@ -6,7 +6,6 @@ import (
 	"fmt"
 
 	"go.uber.org/dig"
-	"go.uber.org/multierr"
 
 	"github.com/krostar/cli"
 )
@@ -57,7 +56,7 @@ func Invoke(ctx context.Context, f any, opts ...dig.InvokeOption) error {
 	}
 
 	if errs, _ := cli.GetMetadataFromContext(ctx, contextKeyDIProvideErrors).([]error); len(errs) > 0 { //nolint:revive,errcheck // unchecked-type-assertion: we know this type for sure
-		return fmt.Errorf("provider error: %v", multierr.Combine(errs...))
+		return fmt.Errorf("provider error: %v", errors.Join(errs...))
 	}
 
 	if err := container.Invoke(f, opts...); err != nil {

@@ -2,13 +2,12 @@ package sourceenv
 
 import (
 	"context"
+	"errors"
 	"fmt"
 	"os"
 	"reflect"
 	"strconv"
 	"strings"
-
-	"go.uber.org/multierr"
 
 	clicfg "github.com/krostar/cli/cfg"
 )
@@ -87,7 +86,7 @@ func recursivelyWalkThroughReflectValue(lookupEnv func(string) (string, bool), v
 			errs = append(errs, err)
 		}
 
-		return atLeastOneFound, multierr.Combine(errs...)
+		return atLeastOneFound, errors.Join(errs...)
 
 	default: // for primitive types, try to find the corresponding environment variable
 		var rawEnv string

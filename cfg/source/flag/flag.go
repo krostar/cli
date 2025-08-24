@@ -6,8 +6,6 @@ import (
 	"fmt"
 	"reflect"
 
-	"go.uber.org/multierr"
-
 	"github.com/krostar/cli"
 	clicfg "github.com/krostar/cli/cfg"
 )
@@ -130,7 +128,7 @@ func recursivelyWalkThroughReflectValue(pointers map[uintptr]struct{}, v1, v2 re
 			errs = append(errs, recursivelyWalkThroughReflectValue(pointers, v1.Field(i), v2.Field(i)))
 		}
 
-		return multierr.Combine(errs...)
+		return errors.Join(errs...)
 
 	default:
 		if !v1.CanAddr() {
