@@ -11,6 +11,10 @@
           paths = ["internal/example"];
           rules = [
             {
+              linters = ["revive"];
+              text = "package-directory-mismatch: package name";
+            }
+            {
               path = "cfg/source/env/|cfg/source/flag/";
               linters = ["depguard"];
               text = "import 'reflect' is not allowed";

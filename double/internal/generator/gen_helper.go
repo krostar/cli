@@ -80,8 +80,8 @@ func fillUsedImports(t types.Type, imports map[string]string) {
 
 		if t.TypeArgs() != nil { // handle generic types by recursively processing type arguments
 			args := t.TypeArgs()
-			for i := range args.Len() {
-				fillUsedImports(args.At(i), imports)
+			for i := range args.Types() {
+				fillUsedImports(i, imports)
 			}
 		}
 
@@ -103,13 +103,13 @@ func fillUsedImports(t types.Type, imports map[string]string) {
 
 	case *types.Signature: // for function signatures, process all parameter and result types
 		params := t.Params()
-		for i := range params.Len() {
-			fillUsedImports(params.At(i).Type(), imports)
+		for i := range params.Variables() {
+			fillUsedImports(i.Type(), imports)
 		}
 
 		results := t.Results()
-		for i := range results.Len() {
-			fillUsedImports(results.At(i).Type(), imports)
+		for i := range results.Variables() {
+			fillUsedImports(i.Type(), imports)
 		}
 	}
 }

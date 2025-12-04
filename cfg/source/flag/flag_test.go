@@ -38,8 +38,7 @@ func Test_Source(t *testing.T) {
 					func(s string) (map[string]string, error) {
 						m := make(map[string]string)
 
-						lines := strings.Split(s, ",")
-						for _, line := range lines {
+						for line := range strings.SplitSeq(s, ",") {
 							split := strings.SplitN(line, ":", 2)
 							switch len(split) {
 							case 0:

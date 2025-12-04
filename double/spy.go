@@ -32,6 +32,7 @@ func wrapCLIWithSpy(spy *Spy, tree []*cli.CLI, c *cli.CLI) *cli.CLI {
 			saveRecord: func(record SpyCommandRecord) {
 				spy.m.Lock()
 				defer spy.m.Unlock()
+
 				spy.commands[spy.records.PushBack(record)] = append(tree, spied)
 			},
 		})

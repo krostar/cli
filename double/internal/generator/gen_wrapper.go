@@ -51,6 +51,7 @@ func generateInterfaceWrappedImplementation(ctx context.Context, mainCommandInte
 			for _, value := range m {
 				values = append(values, value)
 			}
+
 			slices.Sort(values)
 			return values
 		},
