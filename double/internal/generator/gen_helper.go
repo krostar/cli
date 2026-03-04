@@ -14,6 +14,10 @@ import (
 // This function is used to generate function signatures in the generated code,
 // creating sequential variable names and proper type representations.
 func getTupleRepresentation(params *types.Tuple, imports map[string]string, nbVariables int) ([]string, []string, []string) {
+	if nbVariables+params.Len() >= 260 {
+		panic("unhandled overlapping number of variables")
+	}
+
 	var (
 		vars      []string
 		typs      []string
@@ -27,8 +31,8 @@ func getTupleRepresentation(params *types.Tuple, imports map[string]string, nbVa
 		typ := types.TypeString(paramType, packageQualifier(imports))
 
 		variable := string([]byte{
-			byte('a' + (i+(nbVariables%26))%26),
-			byte('0' + (i+(nbVariables/26))/26),
+			byte('a' + ((nbVariables + i) % 26)),
+			byte('0' + (((nbVariables + i) / 26) % 10)),
 		})
 
 		vars = append(vars, variable)
