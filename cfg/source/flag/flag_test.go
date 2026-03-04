@@ -257,6 +257,7 @@ func Test_reflectSetValue(t *testing.T) {
 		"type mismatch": {
 			setup: func() (reflect.Value, reflect.Value) {
 				var dst int
+
 				src := "string"
 				return reflect.ValueOf(&dst).Elem(), reflect.ValueOf(src)
 			},
@@ -265,6 +266,7 @@ func Test_reflectSetValue(t *testing.T) {
 		"can set": {
 			setup: func() (reflect.Value, reflect.Value) {
 				var dst int
+
 				src := 42
 				return reflect.ValueOf(&dst).Elem(), reflect.ValueOf(src)
 			},

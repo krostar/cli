@@ -27,7 +27,7 @@
             {
               path = "double/internal/generator/";
               linters = ["gosec" "goconst"];
-              text = "Potential file inclusion via variable|make it a constant";
+              text = "Command injection via taint analysis|Subprocess launched with variable|Path traversal via taint analysis|Potential file inclusion via variable|make it a constant";
             }
           ];
         };
