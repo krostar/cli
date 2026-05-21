@@ -15,7 +15,7 @@
               text = "package-directory-mismatch: package name";
             }
             {
-              path = "cfg/source/default/|cfg/source/env/|cfg/source/flag/";
+              path = "cfg/source/default/|cfg/source/env/|cfg/source/flag/|cfg/validator/";
               linters = ["depguard"];
               text = "import 'reflect' is not allowed";
             }
