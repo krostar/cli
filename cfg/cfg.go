@@ -18,38 +18,34 @@ import (
 // Each source implementation knows how to populate fields of type T from its specific source.
 type SourceFunc[T any] func(ctx context.Context, cfg *T) error
 
-// BeforeCommandExecutionHook creates a hook that applies multiple configuration sources
-// to a destination config. The sources are applied in the order they are provided,
-// with later sources overriding values from earlier ones if they provide the same setting.
-// Returns a cli.HookFunc that can be used as a BeforeCommandExecution hook.
+// Apply applies the provided sources in order to a newly allocated config and writes the result
+// to dest. Sources are applied left to right; later ones override values set by earlier ones.
 //
 // Example:
 //
-//	func (cmd *MyCommand) Hook() *cli.Hook {
-//	    return &cli.Hook{
-//	        BeforeCommandExecution: clicfg.BeforeCommandExecutionHook(
-//	            &cmd.config,
-//	            sourcedefault.Source[Config](),                 // 1. Default values (lowest priority)
-//	            sourcefile.Source(getFilePath, decoder, true),  // 2. Config from file
-//	            sourceenv.Source[Config]("APP"),                // 3. Environment variables
-//	            sourceflag.Source[Config](cmd),                 // 4. Command-line flags (highest priority)
-//	        ),
-//	    }
-//	}
-func BeforeCommandExecutionHook[T any](dest *T, source SourceFunc[T], sources ...SourceFunc[T]) cli.HookFunc {
+//	clicfg.Apply(ctx, &cfg,
+//	    sourcedefault.Source[Config](),                 // 1. Default values (lowest priority)
+//	    sourcefile.Source(getFilePath, decoder, true),  // 2. Config from file
+//	    sourceenv.Source[Config]("APP"),                // 3. Environment variables
+//	    sourceflag.Source[Config](cmd),                 // 4. Command-line flags (highest priority)
+//	)
+func Apply[T any](ctx context.Context, dest *T, source SourceFunc[T], sources ...SourceFunc[T]) error {
 	sources = append([]SourceFunc[T]{source}, sources...)
 
-	return func(ctx context.Context) error {
-		cfg := new(T)
+	cfg := new(T)
 
-		for i, source := range sources {
-			if err := source(ctx, cfg); err != nil {
-				return fmt.Errorf("unable to apply config source[%d]: %w", i, err)
-			}
+	for i, source := range sources {
+		if err := source(ctx, cfg); err != nil {
+			return fmt.Errorf("unable to apply config source[%d]: %w", i, err)
 		}
-
-		*dest = *cfg
-
-		return nil
 	}
+
+	*dest = *cfg
+
+	return nil
+}
+
+// BeforeCommandExecutionHook returns a cli.HookFunc that calls Apply with the provided sources.
+func BeforeCommandExecutionHook[T any](dest *T, source SourceFunc[T], sources ...SourceFunc[T]) cli.HookFunc {
+	return func(ctx context.Context) error { return Apply(ctx, dest, source, sources...) }
 }
