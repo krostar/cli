@@ -21,7 +21,8 @@ func NewFake(opts ...FakeOption) cli.Command {
 		opt(f)
 	}
 
-	return reduceWrapped(f,
+	return reduceWrapped(
+		f,
 		f.onContext != nil,
 		f.onDescription != nil,
 		f.onExamples != nil,

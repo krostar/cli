@@ -32,9 +32,11 @@ func Test_Source(t *testing.T) {
 		src := Source[configWithFlag](&cfgForFlags)
 		ctx := cli.NewCommandContext(test.Context(t))
 
-		cli.SetInitializedFlagsInContext(ctx,
+		cli.SetInitializedFlagsInContext(
+			ctx,
 			[]cli.Flag{
-				cli.NewFlag("a", "", cli.NewFlagValuer(&cfgForFlags.C,
+				cli.NewFlag("a", "", cli.NewFlagValuer(
+					&cfgForFlags.C,
 					func(s string) (map[string]string, error) {
 						m := make(map[string]string)
 
@@ -105,7 +107,8 @@ func Test_Source(t *testing.T) {
 		var cfgForFlags simpleNestedConfig
 
 		ctx := cli.NewCommandContext(test.Context(t))
-		cli.SetInitializedFlagsInContext(ctx,
+		cli.SetInitializedFlagsInContext(
+			ctx,
 			[]cli.Flag{
 				cli.NewBuiltinFlag("host", "", &cfgForFlags.Server.Host, ""),
 				cli.NewBuiltinFlag("port", "", &cfgForFlags.Server.Port, ""),
@@ -145,7 +148,8 @@ func Test_Source(t *testing.T) {
 		src := Source[configWithFlag](&cfgForFlags)
 
 		ctx := cli.NewCommandContext(test.Context(t))
-		cli.SetInitializedFlagsInContext(ctx,
+		cli.SetInitializedFlagsInContext(
+			ctx,
 			[]cli.Flag{cli.NewBuiltinFlag("a", "", &cfgForFlags.A, "")},
 			[]cli.Flag{cli.NewBuiltinFlag("b", "", &cfgForFlags.D.B, "")},
 		)
@@ -161,7 +165,8 @@ func Test_Source(t *testing.T) {
 
 		src := Source[configWithFlag](&cfgForFlags)
 		ctx := cli.NewCommandContext(test.Context(t))
-		cli.SetInitializedFlagsInContext(ctx,
+		cli.SetInitializedFlagsInContext(
+			ctx,
 			[]cli.Flag{cli.NewBuiltinFlag("a", "", &flagDest, "")},
 			[]cli.Flag{cli.NewBuiltinFlag("b", "", &cfgForFlags.D.B, "")},
 		)

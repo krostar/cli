@@ -74,7 +74,8 @@ func Test_reduceWrapped(t *testing.T) {
 	fake := new(fakeAllInterfaces)
 
 	for i := 0; i < len(combinations); i++ {
-		cmd := reduceWrapped(fake,
+		cmd := reduceWrapped(
+			fake,
 			combinations[i][0],
 			combinations[i][1],
 			combinations[i][2],

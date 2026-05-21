@@ -31,7 +31,8 @@ func Test_Exit(t *testing.T) {
 			exitMessage bufferThatCloses
 		)
 
-		Exit(test.Context(t), nil,
+		Exit(
+			test.Context(t), nil,
 			WithExitFunc(func(status int) {
 				exitStatus = &status
 			}),
@@ -53,7 +54,8 @@ func Test_Exit(t *testing.T) {
 				exitMessage bufferThatCloses
 			)
 
-			Exit(test.Context(t), errors.New("boom"),
+			Exit(
+				test.Context(t), errors.New("boom"),
 				WithExitFunc(func(status int) {
 					exitStatus = &status
 				}),
@@ -74,7 +76,8 @@ func Test_Exit(t *testing.T) {
 				exitMessage bufferThatCloses
 			)
 
-			Exit(test.Context(t), NewErrorWithExitStatus(errors.New("boom"), 42),
+			Exit(
+				test.Context(t), NewErrorWithExitStatus(errors.New("boom"), 42),
 				WithExitFunc(func(status int) {
 					exitStatus = &status
 				}),

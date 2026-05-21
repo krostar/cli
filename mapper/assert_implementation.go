@@ -129,16 +129,17 @@ func AssertImplementation(t *testing.T, executeFunc func(*testing.T, []string, *
 			flagBool bool
 		)
 
-		err := executeFunc(t, []string{"myapp", "--str", "value", "--int", "42", "--bool"}, cli.
-			New(double.NewFake(
-				double.FakeWithFlags(func() []cli.Flag {
-					return []cli.Flag{
-						cli.NewBuiltinFlag("str", "s", &flagStr, "String flag"),
-						cli.NewBuiltinFlag("int", "i", &flagInt, "Int flag"),
-						cli.NewBuiltinFlag("bool", "b", &flagBool, "Bool flag"),
-					}
-				}),
-			)),
+		err := executeFunc(
+			t, []string{"myapp", "--str", "value", "--int", "42", "--bool"}, cli.
+				New(double.NewFake(
+					double.FakeWithFlags(func() []cli.Flag {
+						return []cli.Flag{
+							cli.NewBuiltinFlag("str", "s", &flagStr, "String flag"),
+							cli.NewBuiltinFlag("int", "i", &flagInt, "Int flag"),
+							cli.NewBuiltinFlag("bool", "b", &flagBool, "Bool flag"),
+						}
+					}),
+				)),
 		)
 		test.Assert(t, err == nil, "%v", err)
 		test.Assert(t, flagStr == "value")
@@ -177,12 +178,14 @@ func AssertImplementation(t *testing.T, executeFunc func(*testing.T, []string, *
 			}),
 		)
 
-		spy, spied := double.SpyCLI(cli.
-			New(rootCmd).
-			Mount("sub", cli.
-				New(subCmd).
-				AddCommand("nested", nestedCmd),
-			),
+		spy, spied := double.SpyCLI(
+			cli.
+				New(rootCmd).
+				Mount(
+					"sub", cli.
+						New(subCmd).
+						AddCommand("nested", nestedCmd),
+				),
 		)
 
 		err := executeFunc(t, []string{
@@ -259,12 +262,14 @@ func AssertImplementation(t *testing.T, executeFunc func(*testing.T, []string, *
 			}),
 		)
 
-		err := executeFunc(t, []string{"app", "sub", "nested"}, cli.
-			New(rootCmd).
-			Mount("sub", cli.
-				New(subCmd).
-				AddCommand("nested", nestedCmd),
-			),
+		err := executeFunc(
+			t, []string{"app", "sub", "nested"}, cli.
+				New(rootCmd).
+				Mount(
+					"sub", cli.
+						New(subCmd).
+						AddCommand("nested", nestedCmd),
+				),
 		)
 		test.Assert(t, err == nil, "%v", err)
 
@@ -279,7 +284,8 @@ func AssertImplementation(t *testing.T, executeFunc func(*testing.T, []string, *
 			"root:PersistentAfterCommandExecution",
 		}
 
-		test.Assert(t, slices.Equal(hookCallOrder, expectedOrder),
+		test.Assert(
+			t, slices.Equal(hookCallOrder, expectedOrder),
 			"Hook execution order incorrect:\nExpected: %v\nActual: %v",
 			expectedOrder, hookCallOrder,
 		)
@@ -287,16 +293,19 @@ func AssertImplementation(t *testing.T, executeFunc func(*testing.T, []string, *
 
 	t.Run("command structure and execution", func(t *testing.T) {
 		t.Run("correctly executes subcommand", func(t *testing.T) {
-			spy, spied := double.SpyCLI(cli.
-				New(double.NewFake()).
-				Mount("sub1", cli.
+			spy, spied := double.SpyCLI(
+				cli.
 					New(double.NewFake()).
-					AddCommand("nested1", double.NewFake()),
-				).
-				Mount("sub2", cli.
-					New(double.NewFake()).
-					AddCommand("nested2", double.NewFake()),
-				),
+					Mount(
+						"sub1", cli.
+							New(double.NewFake()).
+							AddCommand("nested1", double.NewFake()),
+					).
+					Mount(
+						"sub2", cli.
+							New(double.NewFake()).
+							AddCommand("nested2", double.NewFake()),
+					),
 			)
 
 			err := executeFunc(t, []string{"app", "sub1", "nested1"}, spied)
@@ -354,9 +363,10 @@ func AssertImplementation(t *testing.T, executeFunc func(*testing.T, []string, *
 			createCLI := func() *cli.CLI {
 				return cli.
 					New(rootCmd).
-					Mount("sub", cli.
-						New(subCmd).
-						AddCommand("nested", nestedCmd),
+					Mount(
+						"sub", cli.
+							New(subCmd).
+							AddCommand("nested", nestedCmd),
 					)
 			}
 

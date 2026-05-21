@@ -16,7 +16,8 @@ func Test_BeforeCommandExecutionHook(t *testing.T) {
 	var cfg config
 
 	t.Run("ok", func(t *testing.T) {
-		test.Require(t, BeforeCommandExecutionHook(&cfg,
+		test.Require(t, BeforeCommandExecutionHook(
+			&cfg,
 			func(_ context.Context, cfg *config) error {
 				cfg.A += "1"
 				return nil
@@ -37,7 +38,8 @@ func Test_BeforeCommandExecutionHook(t *testing.T) {
 	t.Run("error", func(t *testing.T) {
 		expectedErr := errors.New("boom")
 
-		test.Assert(t, errors.Is(BeforeCommandExecutionHook(&cfg,
+		test.Assert(t, errors.Is(BeforeCommandExecutionHook(
+			&cfg,
 			func(context.Context, *config) error {
 				return expectedErr
 			},

@@ -1,5 +1,4 @@
 {lib, ...}: {
-  dev.git-cliff.enable = true;
   ci.testers.go.enable = true;
   ci.linters = {
     commitlint.enable = true;
@@ -7,6 +6,7 @@
     golangci-lint = {
       enable = true;
       linters = {
+        disable = ["goconst"];
         exclusions = {
           paths = ["internal/example"];
           rules = [

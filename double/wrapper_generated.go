@@ -677,6 +677,7 @@ func (r *wrappedCommandCommandDescriptionCommandFlags) Execute(a0 context.Contex
 func (r *wrappedCommandCommandDescriptionCommandFlags) Description() string {
 	return r.wrapped.Description()
 }
+
 func (r *wrappedCommandCommandDescriptionCommandFlags) Flags() []cli.Flag { return r.wrapped.Flags() }
 
 type wrappedCommandCommandContextCommandDescriptionCommandFlags struct{ wrapped commandAllInterfaces }
@@ -702,6 +703,7 @@ type wrappedCommandCommandExamplesCommandFlags struct{ wrapped commandAllInterfa
 func (r *wrappedCommandCommandExamplesCommandFlags) Execute(a0 context.Context, b0, c0 []string) error {
 	return r.wrapped.Execute(a0, b0, c0)
 }
+
 func (r *wrappedCommandCommandExamplesCommandFlags) Examples() []string { return r.wrapped.Examples() }
 func (r *wrappedCommandCommandExamplesCommandFlags) Flags() []cli.Flag  { return r.wrapped.Flags() }
 
@@ -815,6 +817,7 @@ type wrappedCommandCommandExamplesCommandHook struct{ wrapped commandAllInterfac
 func (r *wrappedCommandCommandExamplesCommandHook) Execute(a0 context.Context, b0, c0 []string) error {
 	return r.wrapped.Execute(a0, b0, c0)
 }
+
 func (r *wrappedCommandCommandExamplesCommandHook) Examples() []string { return r.wrapped.Examples() }
 func (r *wrappedCommandCommandExamplesCommandHook) Hook() *cli.Hook    { return r.wrapped.Hook() }
 
@@ -1323,7 +1326,9 @@ type wrappedCommandCommandHookCommandPersistentFlags struct{ wrapped commandAllI
 func (r *wrappedCommandCommandHookCommandPersistentFlags) Execute(a0 context.Context, b0, c0 []string) error {
 	return r.wrapped.Execute(a0, b0, c0)
 }
+
 func (r *wrappedCommandCommandHookCommandPersistentFlags) Hook() *cli.Hook { return r.wrapped.Hook() }
+
 func (r *wrappedCommandCommandHookCommandPersistentFlags) PersistentFlags() []cli.Flag {
 	return r.wrapped.PersistentFlags()
 }
@@ -1959,7 +1964,9 @@ type wrappedCommandCommandHookCommandPersistentHook struct{ wrapped commandAllIn
 func (r *wrappedCommandCommandHookCommandPersistentHook) Execute(a0 context.Context, b0, c0 []string) error {
 	return r.wrapped.Execute(a0, b0, c0)
 }
+
 func (r *wrappedCommandCommandHookCommandPersistentHook) Hook() *cli.Hook { return r.wrapped.Hook() }
+
 func (r *wrappedCommandCommandHookCommandPersistentHook) PersistentHook() *cli.PersistentHook {
 	return r.wrapped.PersistentHook()
 }
@@ -3122,6 +3129,7 @@ type wrappedCommandCommandExamplesCommandUsage struct{ wrapped commandAllInterfa
 func (r *wrappedCommandCommandExamplesCommandUsage) Execute(a0 context.Context, b0, c0 []string) error {
 	return r.wrapped.Execute(a0, b0, c0)
 }
+
 func (r *wrappedCommandCommandExamplesCommandUsage) Examples() []string { return r.wrapped.Examples() }
 func (r *wrappedCommandCommandExamplesCommandUsage) Usage() string      { return r.wrapped.Usage() }
 
@@ -3500,8 +3508,10 @@ func (r *wrappedCommandCommandFlagsCommandHookCommandUsage) Execute(a0 context.C
 func (r *wrappedCommandCommandFlagsCommandHookCommandUsage) Flags() []cli.Flag {
 	return r.wrapped.Flags()
 }
+
 func (r *wrappedCommandCommandFlagsCommandHookCommandUsage) Hook() *cli.Hook { return r.wrapped.Hook() }
-func (r *wrappedCommandCommandFlagsCommandHookCommandUsage) Usage() string   { return r.wrapped.Usage() }
+
+func (r *wrappedCommandCommandFlagsCommandHookCommandUsage) Usage() string { return r.wrapped.Usage() }
 
 type wrappedCommandCommandContextCommandFlagsCommandHookCommandUsage struct{ wrapped commandAllInterfaces }
 
@@ -3686,6 +3696,7 @@ func (r *wrappedCommandCommandPersistentFlagsCommandUsage) Execute(a0 context.Co
 func (r *wrappedCommandCommandPersistentFlagsCommandUsage) PersistentFlags() []cli.Flag {
 	return r.wrapped.PersistentFlags()
 }
+
 func (r *wrappedCommandCommandPersistentFlagsCommandUsage) Usage() string { return r.wrapped.Usage() }
 
 type wrappedCommandCommandContextCommandPersistentFlagsCommandUsage struct{ wrapped commandAllInterfaces }
@@ -4451,6 +4462,7 @@ func (r *wrappedCommandCommandPersistentHookCommandUsage) Execute(a0 context.Con
 func (r *wrappedCommandCommandPersistentHookCommandUsage) PersistentHook() *cli.PersistentHook {
 	return r.wrapped.PersistentHook()
 }
+
 func (r *wrappedCommandCommandPersistentHookCommandUsage) Usage() string { return r.wrapped.Usage() }
 
 type wrappedCommandCommandContextCommandPersistentHookCommandUsage struct{ wrapped commandAllInterfaces }

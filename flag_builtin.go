@@ -22,7 +22,8 @@ func NewBuiltinFlag[T builtins](longName, shortName string, destination *T, desc
 func NewBuiltinPointerFlag[T builtins](longName, shortName string, destination **T, description string) Flag {
 	return NewFlag(
 		longName, shortName,
-		NewFlagValuer(destination,
+		NewFlagValuer(
+			destination,
 			func(s string) (*T, error) {
 				b, err := builtinFromString[T](s)
 				if err != nil {
@@ -48,7 +49,8 @@ func NewBuiltinPointerFlag[T builtins](longName, shortName string, destination *
 func NewBuiltinSliceFlag[T builtins](longName, shortName string, destination *[]T, description string) Flag {
 	return NewFlag(
 		longName, shortName,
-		NewFlagValuer(destination,
+		NewFlagValuer(
+			destination,
 			func(raw string) ([]T, error) {
 				rawValues := strings.Split(raw, ",")
 				values := make([]T, len(rawValues))
