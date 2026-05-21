@@ -25,7 +25,10 @@ func Test_Validate(t *testing.T) {
 
 	t.Run("nested field Validate is called when parent has no Validate", func(t *testing.T) {
 		var cfg configWithNestedValidate
-		test.Assert(t, errors.Is(Validate(&cfg), errInvalid))
+
+		err := Validate(&cfg)
+		test.Assert(t, errors.Is(err, errInvalid))
+		test.Assert(t, err.Error() == "Sub: invalid")
 	})
 
 	t.Run("nested field Validate is not called when parent implements Validate", func(t *testing.T) {
@@ -41,6 +44,14 @@ func Test_Validate(t *testing.T) {
 	t.Run("non-nil pointer field Validate is called", func(t *testing.T) {
 		cfg := configWithNilPtr{Sub: &subConfigWithValidate{}}
 		test.Assert(t, errors.Is(Validate(&cfg), errInvalid))
+	})
+
+	t.Run("deep nested field error includes full dotted path", func(t *testing.T) {
+		var cfg configWithDeepNestedValidate
+
+		err := Validate(&cfg)
+		test.Assert(t, errors.Is(err, errInvalid))
+		test.Assert(t, err.Error() == "Outer.Sub: invalid")
 	})
 }
 
@@ -81,10 +92,16 @@ type configOwnsValidation struct {
 	Sub subConfigWithValidate
 }
 
-func (cfg *configOwnsValidation) Validate() error {
+func (*configOwnsValidation) Validate() error {
 	return nil // deliberately ignores Sub.B being empty
 }
 
 type configWithNilPtr struct {
 	Sub *subConfigWithValidate
+}
+
+type configWithDeepNestedValidate struct {
+	Outer struct {
+		Sub subConfigWithValidate
+	}
 }

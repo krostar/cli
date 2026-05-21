@@ -2,19 +2,28 @@ package clicfgvalidator
 
 import (
 	"errors"
+	"fmt"
 	"reflect"
 )
 
 // Validate walks cfg and calls Validate() on any type that implements it.
 // When a type implements Validate(), its sub-fields are not visited, the type
 // is responsible for validating them.
+// Errors are annotated with the dot-separated field path, e.g. "Sub.Field: invalid".
 func Validate[T any](cfg *T) error {
-	return recursivelyValidate(reflect.ValueOf(cfg))
+	return recursivelyValidate(reflect.ValueOf(cfg), "")
 }
 
-func recursivelyValidate(v reflect.Value) error {
+func recursivelyValidate(v reflect.Value, path string) error {
 	type validator interface {
 		Validate() error
+	}
+
+	wrapErr := func(err error) error {
+		if err == nil || path == "" {
+			return err
+		}
+		return fmt.Errorf("%s: %w", path, err)
 	}
 
 	switch v.Kind() {
@@ -24,15 +33,15 @@ func recursivelyValidate(v reflect.Value) error {
 		}
 
 		if vv, ok := v.Interface().(validator); ok {
-			return vv.Validate()
+			return wrapErr(vv.Validate())
 		}
 
-		return recursivelyValidate(v.Elem())
+		return recursivelyValidate(v.Elem(), path)
 
 	case reflect.Struct:
 		if v.CanAddr() {
 			if vv, ok := v.Addr().Interface().(validator); ok {
-				return vv.Validate()
+				return wrapErr(vv.Validate())
 			}
 		}
 
@@ -43,7 +52,14 @@ func recursivelyValidate(v reflect.Value) error {
 				continue
 			}
 
-			errs = append(errs, recursivelyValidate(v.Field(i)))
+			fieldName := v.Type().Field(i).Name
+			fieldPath := fieldName
+
+			if path != "" {
+				fieldPath = path + "." + fieldName
+			}
+
+			errs = append(errs, recursivelyValidate(v.Field(i), fieldPath))
 		}
 
 		return errors.Join(errs...)
