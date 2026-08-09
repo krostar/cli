@@ -7,8 +7,8 @@ import (
 	"path/filepath"
 	"testing"
 
+	"github.com/goccy/go-yaml"
 	"github.com/krostar/test"
-	"gopkg.in/yaml.v3"
 )
 
 type configWithFile struct {
@@ -32,10 +32,9 @@ awesome: avalue
 				return cfg.Filename
 			},
 			func(r io.Reader, cfg *configWithFile) error {
-				decoder := yaml.NewDecoder(r)
-				decoder.KnownFields(true)
+				decoder := yaml.NewDecoder(r, yaml.DisallowUnknownField())
 
-				return decoder.Decode(&cfg)
+				return decoder.Decode(cfg)
 			},
 			false,
 		)
