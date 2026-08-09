@@ -24,7 +24,7 @@ jobs:
     runs-on: "ubuntu-latest"
     timeout-minutes: 10
     steps:
-      - uses: "nixbuild/nix-quick-install-action@2c9db80fb984ceb1bcaa77cdda3fdf8cfba92035" # v34
+      - uses: "nixbuild/nix-quick-install-action@9f63be77f412a248c9d9a65a4c82cf066cdf8f0c" # v35
       - uses: "nix-community/cache-nix-action@7df957e333c1e5da7721f60227dbba6d06080569" # v7
         with:
           primary-key: "cache-nix-store-${{ runner.os }}-${{ hashFiles('flake.nix', 'flake.lock') }}"
@@ -38,7 +38,7 @@ jobs:
         with:
           name: "krostar"
           authToken: "${{ secrets.CACHIX_AUTH_TOKEN }}"
-      - uses: "actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd" # v6
+      - uses: "actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1" # v7
       - name: "Print nix version"
         run: "nix --version"
       - name: "Print flake metadata"
