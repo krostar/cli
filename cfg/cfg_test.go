@@ -15,7 +15,7 @@ func Test_Apply(t *testing.T) {
 		var cfg config
 
 		test.Require(t, Apply(
-			test.Context(t), &cfg,
+			t.Context(), &cfg,
 			func(_ context.Context, cfg *config) error { cfg.A += "1"; return nil },
 			func(_ context.Context, cfg *config) error { cfg.A += "2"; return nil },
 			func(_ context.Context, cfg *config) error { cfg.A += "3"; return nil },
@@ -30,7 +30,7 @@ func Test_Apply(t *testing.T) {
 		expectedErr := errors.New("boom")
 
 		err := Apply(
-			test.Context(t), &cfg,
+			t.Context(), &cfg,
 			func(context.Context, *config) error { return nil },
 			func(context.Context, *config) error { return expectedErr },
 		)
@@ -47,7 +47,7 @@ func Test_BeforeCommandExecutionHook(t *testing.T) {
 	test.Require(t, BeforeCommandExecutionHook(
 		&cfg,
 		func(_ context.Context, cfg *config) error { cfg.A = "ok"; return nil },
-	)(test.Context(t)) == nil)
+	)(t.Context()) == nil)
 
 	test.Assert(t, cfg.A == "ok")
 }

@@ -102,7 +102,7 @@ func Test_Source(t *testing.T) {
 			},
 		}
 
-		err := Source[configWithEnv]("CUSTOMTESTENV")(test.Context(t), &cfg)
+		err := Source[configWithEnv]("CUSTOMTESTENV")(t.Context(), &cfg)
 		test.Require(t, err == nil, err)
 		test.Assert(check.Compare(t, cfg, configWithEnv{
 			A: "A",
@@ -192,7 +192,7 @@ func Test_Source(t *testing.T) {
 
 		var cfg configWithEmbedded
 
-		err := Source[configWithEmbedded]("CUSTOMTESTENV")(test.Context(t), &cfg)
+		err := Source[configWithEmbedded]("CUSTOMTESTENV")(t.Context(), &cfg)
 		test.Require(t, err == nil, err)
 		test.Assert(check.Compare(t, cfg, configWithEmbedded{
 			foo1: foo1{
@@ -214,7 +214,7 @@ func Test_Source(t *testing.T) {
 		t.Setenv("CUSTOMTESTENV_D_D2", "foo")
 		t.Setenv("CUSTOMTESTENV_E", "foo")
 
-		err := Source[configWithEnv]("CUSTOMTESTENV")(test.Context(t), new(configWithEnv))
+		err := Source[configWithEnv]("CUSTOMTESTENV")(t.Context(), new(configWithEnv))
 		test.Assert(t, err != nil && strings.Contains(err.Error(), "strconv.ParseInt"))
 		test.Assert(t, err != nil && strings.Contains(err.Error(), "unhandled type map"))
 	})

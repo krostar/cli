@@ -45,7 +45,7 @@ awesome: avalue
 			B:        "bvalue",
 			Filename: configFile.Name(),
 		}
-		test.Require(t, src(test.Context(t), &cfg) == nil)
+		test.Require(t, src(t.Context(), &cfg) == nil)
 		test.Assert(t, cfg == configWithFile{
 			A:        "avalue",
 			B:        "bvalue",
@@ -65,7 +65,7 @@ awesome: avalue
 				func(io.Reader, *configWithFile) error { return errors.New("boom") },
 				true,
 			)
-			test.Assert(t, src(test.Context(t), new(configWithFile)) == nil)
+			test.Assert(t, src(t.Context(), new(configWithFile)) == nil)
 		})
 
 		t.Run("do not allow non existing", func(t *testing.T) {
@@ -74,7 +74,7 @@ awesome: avalue
 				func(io.Reader, *configWithFile) error { return errors.New("boom") },
 				false,
 			)
-			test.Assert(t, errors.Is(src(test.Context(t), new(configWithFile)), os.ErrNotExist))
+			test.Assert(t, errors.Is(src(t.Context(), new(configWithFile)), os.ErrNotExist))
 		})
 	})
 
@@ -91,6 +91,6 @@ awesome: avalue
 			false,
 		)
 
-		test.Assert(t, errors.Is(src(test.Context(t), new(configWithFile)), expectedErr))
+		test.Assert(t, errors.Is(src(t.Context(), new(configWithFile)), expectedErr))
 	})
 }

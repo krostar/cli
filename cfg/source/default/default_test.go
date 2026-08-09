@@ -10,28 +10,28 @@ func Test_Source(t *testing.T) {
 	t.Run("cfg without SetDefault method", func(t *testing.T) {
 		var cfg configWithoutDefault
 
-		test.Require(t, Source[configWithoutDefault]()(test.Context(t), &cfg) == nil)
+		test.Require(t, Source[configWithoutDefault]()(t.Context(), &cfg) == nil)
 		test.Assert(t, cfg == configWithoutDefault{})
 	})
 
 	t.Run("cfg with SetDefault method", func(t *testing.T) {
 		var cfg configWithDefault
 
-		test.Require(t, Source[configWithDefault]()(test.Context(t), &cfg) == nil)
+		test.Require(t, Source[configWithDefault]()(t.Context(), &cfg) == nil)
 		test.Assert(t, cfg == configWithDefault{A: "foo"})
 	})
 
 	t.Run("cfg with nested struct field implementing SetDefault", func(t *testing.T) {
 		var cfg configWithNestedDefault
 
-		test.Require(t, Source[configWithNestedDefault]()(test.Context(t), &cfg) == nil)
+		test.Require(t, Source[configWithNestedDefault]()(t.Context(), &cfg) == nil)
 		test.Assert(t, cfg.Sub == subConfigWithDefault{B: "bar"})
 	})
 
 	t.Run("cfg with nil pointer field implementing SetDefault gets initialized", func(t *testing.T) {
 		var cfg configWithNestedDefault
 
-		test.Require(t, Source[configWithNestedDefault]()(test.Context(t), &cfg) == nil)
+		test.Require(t, Source[configWithNestedDefault]()(t.Context(), &cfg) == nil)
 		test.Require(t, cfg.SubPtr != nil)
 		test.Assert(t, *cfg.SubPtr == subConfigWithDefault{B: "bar"})
 	})
@@ -39,21 +39,21 @@ func Test_Source(t *testing.T) {
 	t.Run("cfg with non-nil pointer field implementing SetDefault", func(t *testing.T) {
 		cfg := configWithNestedDefault{SubPtr: &subConfigWithDefault{}}
 
-		test.Require(t, Source[configWithNestedDefault]()(test.Context(t), &cfg) == nil)
+		test.Require(t, Source[configWithNestedDefault]()(t.Context(), &cfg) == nil)
 		test.Assert(t, *cfg.SubPtr == subConfigWithDefault{B: "bar"})
 	})
 
 	t.Run("cfg with deeply nested field implementing SetDefault", func(t *testing.T) {
 		var cfg configWithDeepDefault
 
-		test.Require(t, Source[configWithDeepDefault]()(test.Context(t), &cfg) == nil)
+		test.Require(t, Source[configWithDeepDefault]()(t.Context(), &cfg) == nil)
 		test.Assert(t, cfg.Sub.Deep == subConfigWithDefault{B: "bar"})
 	})
 
 	t.Run("nil pointer to non-setter type is initialized when a nested field has SetDefault", func(t *testing.T) {
 		var cfg configWithNilPtrToNonSetter
 
-		test.Require(t, Source[configWithNilPtrToNonSetter]()(test.Context(t), &cfg) == nil)
+		test.Require(t, Source[configWithNilPtrToNonSetter]()(t.Context(), &cfg) == nil)
 		test.Require(t, cfg.Sub != nil)
 		test.Assert(t, cfg.Sub.Inner == subConfigWithDefault{B: "bar"})
 	})
@@ -61,14 +61,14 @@ func Test_Source(t *testing.T) {
 	t.Run("nil pointer to non-setter type stays nil when no nested field has SetDefault", func(t *testing.T) {
 		var cfg struct{ Sub *configWithoutDefault }
 
-		test.Require(t, Source[struct{ Sub *configWithoutDefault }]()(test.Context(t), &cfg) == nil)
+		test.Require(t, Source[struct{ Sub *configWithoutDefault }]()(t.Context(), &cfg) == nil)
 		test.Assert(t, cfg.Sub == nil)
 	})
 
 	t.Run("parent SetDefault runs after field SetDefault and can override it", func(t *testing.T) {
 		var cfg configOverridesField
 
-		test.Require(t, Source[configOverridesField]()(test.Context(t), &cfg) == nil)
+		test.Require(t, Source[configOverridesField]()(t.Context(), &cfg) == nil)
 		// parent overrides B, child's C is untouched
 		test.Assert(t, cfg.Sub == subConfigOverridable{B: "parent", C: "child"})
 	})

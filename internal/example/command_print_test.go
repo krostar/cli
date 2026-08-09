@@ -9,7 +9,7 @@ import (
 )
 
 func Test_CommandPrint_Execute(t *testing.T) {
-	ctx := test.Context(t)
+	ctx := t.Context()
 
 	t.Run("ok", func(t *testing.T) {
 		output := new(bytes.Buffer)

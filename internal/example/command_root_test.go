@@ -12,7 +12,7 @@ import (
 func Test_CommandRoot_Execute(t *testing.T) {
 	cmd := new(CommandRoot)
 
-	err := cmd.Execute(test.Context(t), nil, nil)
+	err := cmd.Execute(t.Context(), nil, nil)
 	test.Assert(t, err != nil)
 
 	var showUsageErr cli.ShowHelpError

@@ -32,7 +32,7 @@ func Test_Exit(t *testing.T) {
 		)
 
 		Exit(
-			test.Context(t), nil,
+			t.Context(), nil,
 			WithExitFunc(func(status int) {
 				exitStatus = &status
 			}),
@@ -55,7 +55,7 @@ func Test_Exit(t *testing.T) {
 			)
 
 			Exit(
-				test.Context(t), errors.New("boom"),
+				t.Context(), errors.New("boom"),
 				WithExitFunc(func(status int) {
 					exitStatus = &status
 				}),
@@ -77,7 +77,7 @@ func Test_Exit(t *testing.T) {
 			)
 
 			Exit(
-				test.Context(t), NewErrorWithExitStatus(errors.New("boom"), 42),
+				t.Context(), NewErrorWithExitStatus(errors.New("boom"), 42),
 				WithExitFunc(func(status int) {
 					exitStatus = &status
 				}),
@@ -106,11 +106,11 @@ func Test_ExitOption(t *testing.T) {
 
 func Test_loggerInMetadata(t *testing.T) {
 	t.Run("get a logger even if none is previously set", func(t *testing.T) {
-		test.Require(t, getExitLoggerFromMetadata(test.Context(t)) != nil)
+		test.Require(t, getExitLoggerFromMetadata(t.Context()) != nil)
 	})
 
 	t.Run("set a logger", func(t *testing.T) {
-		ctx := NewContextWithMetadata(test.Context(t))
+		ctx := NewContextWithMetadata(t.Context())
 		logger := new(bufferThatCloses)
 		SetExitLoggerInMetadata(ctx, logger)
 		test.Assert(t, getExitLoggerFromMetadata(ctx) == logger)

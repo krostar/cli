@@ -11,7 +11,7 @@ import (
 
 func Test_ctxCommand(t *testing.T) {
 	{ // check context setup
-		ctx := NewCommandContext(test.Context(t))
+		ctx := NewCommandContext(t.Context())
 
 		value := ctx.Value(ctxKeyCommand)
 		test.Assert(t, value != nil)
@@ -19,7 +19,7 @@ func Test_ctxCommand(t *testing.T) {
 
 	{ // check setting and getting values
 		{ // unprepared context
-			ctx := test.Context(t)
+			ctx := t.Context()
 			SetInitializedFlagsInContext(ctx, []Flag{nil, nil}, []Flag{nil, nil})
 			local, persistent := GetInitializedFlagsFromContext(ctx)
 			test.Assert(t, local == nil)
@@ -27,7 +27,7 @@ func Test_ctxCommand(t *testing.T) {
 		}
 
 		{ // prepared context
-			ctx := NewCommandContext(test.Context(t))
+			ctx := NewCommandContext(t.Context())
 			SetInitializedFlagsInContext(ctx, []Flag{nil, nil}, []Flag{nil})
 			local, persistent := GetInitializedFlagsFromContext(ctx)
 			test.Assert(t, len(local) == 2)
@@ -38,7 +38,7 @@ func Test_ctxCommand(t *testing.T) {
 
 func Test_ctxMetadata(t *testing.T) {
 	{ // check context setup
-		ctx := NewContextWithMetadata(test.Context(t))
+		ctx := NewContextWithMetadata(t.Context())
 
 		value := ctx.Value(ctxKeyMetadata)
 		test.Assert(t, value != nil)
@@ -46,13 +46,13 @@ func Test_ctxMetadata(t *testing.T) {
 
 	{ // check setting and getting values
 		{ // unprepared context
-			ctx := test.Context(t)
+			ctx := t.Context()
 			SetMetadataInContext(ctx, "key", "value")
 			test.Assert(t, GetMetadataFromContext(ctx, "key") == nil)
 		}
 
 		{ // prepared context
-			ctx := NewContextWithMetadata(test.Context(t))
+			ctx := NewContextWithMetadata(t.Context())
 			SetMetadataInContext(ctx, "key", "value")
 			test.Assert(t, GetMetadataFromContext(ctx, "key").(string) == "value")
 		}

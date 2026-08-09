@@ -19,7 +19,7 @@ func Test_DI(t *testing.T) {
 	t.Run("ok", func(t *testing.T) {
 		called := make(map[string]uint)
 
-		ctx := cli.NewContextWithMetadata(test.Context(t))
+		ctx := cli.NewContextWithMetadata(t.Context())
 
 		InitializeContainer(ctx)
 		AddProvider(ctx, func() fooA { return func() { called["fooA"]++ } })
@@ -40,7 +40,7 @@ func Test_DI(t *testing.T) {
 	})
 
 	t.Run("calling without metadata", func(t *testing.T) {
-		ctx := test.Context(t)
+		ctx := t.Context()
 
 		InitializeContainer(ctx)
 		AddProvider(ctx, func() fooA { return func() {} })
@@ -50,7 +50,7 @@ func Test_DI(t *testing.T) {
 	})
 
 	t.Run("provider error", func(t *testing.T) {
-		ctx := cli.NewContextWithMetadata(test.Context(t))
+		ctx := cli.NewContextWithMetadata(t.Context())
 
 		InitializeContainer(ctx)
 		AddProvider(ctx, nil)
@@ -60,7 +60,7 @@ func Test_DI(t *testing.T) {
 	})
 
 	t.Run("invoker error", func(t *testing.T) {
-		ctx := cli.NewContextWithMetadata(test.Context(t))
+		ctx := cli.NewContextWithMetadata(t.Context())
 
 		InitializeContainer(ctx)
 

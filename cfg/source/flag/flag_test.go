@@ -30,7 +30,7 @@ func Test_Source(t *testing.T) {
 		var cfgForFlags configWithFlag
 
 		src := Source[configWithFlag](&cfgForFlags)
-		ctx := cli.NewCommandContext(test.Context(t))
+		ctx := cli.NewCommandContext(t.Context())
 
 		cli.SetInitializedFlagsInContext(
 			ctx,
@@ -106,7 +106,7 @@ func Test_Source(t *testing.T) {
 
 		var cfgForFlags simpleNestedConfig
 
-		ctx := cli.NewCommandContext(test.Context(t))
+		ctx := cli.NewCommandContext(t.Context())
 		cli.SetInitializedFlagsInContext(
 			ctx,
 			[]cli.Flag{
@@ -139,7 +139,7 @@ func Test_Source(t *testing.T) {
 
 		src := Source[configWithFlag](&cfgForFlags)
 
-		test.Assert(t, src(test.Context(t), new(configWithFlag)) == nil)
+		test.Assert(t, src(t.Context(), new(configWithFlag)) == nil)
 	})
 
 	t.Run("no flags set", func(t *testing.T) {
@@ -147,7 +147,7 @@ func Test_Source(t *testing.T) {
 
 		src := Source[configWithFlag](&cfgForFlags)
 
-		ctx := cli.NewCommandContext(test.Context(t))
+		ctx := cli.NewCommandContext(t.Context())
 		cli.SetInitializedFlagsInContext(
 			ctx,
 			[]cli.Flag{cli.NewBuiltinFlag("a", "", &cfgForFlags.A, "")},
@@ -164,7 +164,7 @@ func Test_Source(t *testing.T) {
 		)
 
 		src := Source[configWithFlag](&cfgForFlags)
-		ctx := cli.NewCommandContext(test.Context(t))
+		ctx := cli.NewCommandContext(t.Context())
 		cli.SetInitializedFlagsInContext(
 			ctx,
 			[]cli.Flag{cli.NewBuiltinFlag("a", "", &flagDest, "")},
@@ -187,7 +187,7 @@ func Test_Source(t *testing.T) {
 
 		var cfgForFlags simple
 
-		ctx := cli.NewCommandContext(test.Context(t))
+		ctx := cli.NewCommandContext(t.Context())
 		cli.SetInitializedFlagsInContext(ctx, []cli.Flag{cli.NewBuiltinFlag("bar", "", &cfgForFlags.Bar, "")}, nil)
 
 		flagsLocal, flagsPersistent := cli.GetInitializedFlagsFromContext(ctx)

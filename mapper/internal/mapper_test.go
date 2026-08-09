@@ -88,7 +88,7 @@ func Test_PersistentFlags(t *testing.T) {
 }
 
 func Test_Hook(t *testing.T) {
-	ctx := test.Context(t)
+	ctx := t.Context()
 
 	t.Run("implemented", func(t *testing.T) {
 		hook := Hook(new(commandWithAll))
@@ -112,7 +112,7 @@ func Test_Hook(t *testing.T) {
 }
 
 func Test_PersistentHook(t *testing.T) {
-	ctx := test.Context(t)
+	ctx := t.Context()
 
 	t.Run("implemented", func(t *testing.T) {
 		hook := PersistentHook(new(commandWithAll))
